@@ -1,39 +1,79 @@
 import React from "react";
-import { DrawFunction, Point } from "@/lib/types";
+import { Point, DrawFunction } from "@/lib/types";
 
 export const useOnDraw = (onDraw: DrawFunction) => {
-  const mouseDown = React.useRef<boolean>(false);
-  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const [mouseDown, setMouseDown] = React.useState<boolean>(false);
+  const [drawingHistory, setDrawingHistory] = React.useState<Point[][]>([]);
+  const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const prevPoint = React.useRef<Point | null>(null);
   const handlerRef = React.useRef<((event: MouseEvent) => void) | null>(null);
   const mouseUpHandlerRef = React.useRef<(() => void) | null>(null);
 
-  const onMouseDown = () => {
-    mouseDown.current = true;
-  };
+  const onMouseDown = React.useCallback(() => {
+    setMouseDown(true);
+    setDrawingHistory([...drawingHistory, []]);
+  }, [drawingHistory]);
 
-  const clear = () => {
+  const clear = React.useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    setDrawingHistory([]);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-  };
+  }, []);
+
+  const undo = React.useCallback(() => {
+    if (!drawingHistory.length) return;
+
+    setDrawingHistory((history) => {
+      const copyDrawingHistory = [...history];
+
+      copyDrawingHistory.pop();
+
+      const canvas = canvasRef.current;
+      if (!canvas) return copyDrawingHistory;
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return copyDrawingHistory;
+
+      // Clear the canvas and redraw the remaining lines
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      copyDrawingHistory.forEach((line) => {
+        ctx.beginPath();
+        line.forEach((point, index) => {
+          if (index === 0) {
+            ctx.moveTo(point.x, point.y);
+          } else {
+            ctx.lineTo(point.x, point.y);
+          }
+        });
+        ctx.stroke();
+      });
+
+      return copyDrawingHistory;
+    });
+  }, [drawingHistory]);
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const handler = (event: MouseEvent) => {
-      if (!mouseDown.current) return;
+      if (!mouseDown) return;
       const currPoint = computePointInCanvas(event);
 
       const ctx = canvasRef.current?.getContext("2d");
       if (!ctx || !currPoint) return;
 
-      onDraw({ ctx, currPoint, prevPoint: prevPoint.current });
+      const currentLine = drawingHistory[drawingHistory.length - 1];
+      currentLine.push(currPoint);
+
+      const draw = { ctx, currPoint, prevPoint: prevPoint.current };
+
+      onDraw(draw);
       prevPoint.current = currPoint;
     };
 
@@ -49,7 +89,7 @@ export const useOnDraw = (onDraw: DrawFunction) => {
     };
 
     const mouseUpHandler = () => {
-      mouseDown.current = false;
+      setMouseDown(false);
       prevPoint.current = null;
     };
 
@@ -59,6 +99,7 @@ export const useOnDraw = (onDraw: DrawFunction) => {
     canvas.addEventListener("mousemove", handlerRef.current);
     window.addEventListener("mouseup", mouseUpHandlerRef.current);
 
+    // Remove event listeners
     return () => {
       canvas.removeEventListener(
         "mousemove",
@@ -69,7 +110,7 @@ export const useOnDraw = (onDraw: DrawFunction) => {
         mouseUpHandlerRef.current as EventListener
       );
     };
-  }, [onDraw]);
+  }, [mouseDown, onDraw, drawingHistory]);
 
-  return { canvasRef, onMouseDown, clear };
+  return { canvasRef, onMouseDown, clear, undo };
 };

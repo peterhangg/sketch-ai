@@ -9,20 +9,21 @@ interface CanvasProps {
 
 const Canvas = ({ width, height }: CanvasProps) => {
   const drawLine: DrawFunction = React.useCallback(
-    ({ ctx, currPoint, prevPoint }) => {
-      const { x: currX, y: currY } = currPoint;
-      const lineColor = "#000000";
-      const lineWidth = 5;
+    ({ ctx, currPoint, prevPoint, color = "#000000", width = 5 }) => {
+      if (!ctx) return;
 
+      const { x: currX, y: currY } = currPoint;
       let startingPoint = prevPoint ?? currPoint;
+
       ctx.beginPath();
-      ctx.lineWidth = lineWidth;
-      ctx.strokeStyle = lineColor;
-      ctx.moveTo(startingPoint.x, startingPoint.y);
-      ctx.lineTo(currX, currY);
+      ctx.lineWidth = width;
+      ctx.strokeStyle = color;
+      ctx.moveTo(startingPoint.x, startingPoint.y + 0.5);
+      ctx.lineTo(currX, currY + 0.5);
       ctx.stroke();
 
-      ctx.fillStyle = lineColor;
+      // Fill pixelated line
+      ctx.fillStyle = color;
       ctx.beginPath();
       ctx.arc(startingPoint.x, startingPoint.y, 2, 0, 2 * Math.PI);
       ctx.fill();
@@ -30,7 +31,7 @@ const Canvas = ({ width, height }: CanvasProps) => {
     []
   );
 
-  const { canvasRef, onMouseDown, clear } = useOnDraw(drawLine);
+  const { canvasRef, onMouseDown, clear, undo } = useOnDraw(drawLine);
 
   return (
     <div className="flex flex-col items-center gap-4">
@@ -46,6 +47,12 @@ const Canvas = ({ width, height }: CanvasProps) => {
         onClick={clear}
       >
         Clear
+      </button>
+      <button
+        className="w-[200px] rounded border border-gray-400 bg-white px-4 py-2 font-semibold text-gray-800 shadow hover:bg-gray-100"
+        onClick={undo}
+      >
+        Undo
       </button>
     </div>
   );
