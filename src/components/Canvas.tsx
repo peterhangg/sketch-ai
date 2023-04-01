@@ -2,6 +2,8 @@ import React from "react";
 import { useOnDraw } from "@/hooks/useOnDraw";
 import { DrawFunction } from "@/lib/types";
 
+const ROUND = "round";
+
 interface CanvasProps {
   width: number;
   height: number;
@@ -18,8 +20,10 @@ const Canvas = ({ width, height }: CanvasProps) => {
       ctx.beginPath();
       ctx.lineWidth = width;
       ctx.strokeStyle = color;
-      ctx.moveTo(startingPoint.x, startingPoint.y + 0.5);
-      ctx.lineTo(currX, currY + 0.5);
+      ctx.lineCap = ROUND;
+      ctx.lineJoin = ROUND;
+      ctx.moveTo(startingPoint.x, startingPoint.y);
+      ctx.lineTo(currX, currY);
       ctx.stroke();
 
       // Fill pixelated line
