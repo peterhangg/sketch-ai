@@ -2,15 +2,16 @@ import React from "react";
 import { Point, DrawFunction } from "@/lib/types";
 
 export const useOnDraw = (onDraw: DrawFunction) => {
-  const [mouseDown, setMouseDown] = React.useState<boolean>(false);
   const [drawingHistory, setDrawingHistory] = React.useState<Point[][]>([]);
+
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const prevPoint = React.useRef<Point | null>(null);
+  const mouseDownRef = React.useRef<boolean>(false);
   const handlerRef = React.useRef<((event: MouseEvent) => void) | null>(null);
   const mouseUpHandlerRef = React.useRef<(() => void) | null>(null);
 
   const onMouseDown = React.useCallback(() => {
-    setMouseDown(true);
+    mouseDownRef.current = true;
     setDrawingHistory([...drawingHistory, []]);
   }, [drawingHistory]);
 
@@ -29,19 +30,19 @@ export const useOnDraw = (onDraw: DrawFunction) => {
     if (!drawingHistory.length) return;
 
     setDrawingHistory((history) => {
-      const copyDrawingHistory = [...history];
+      const drawingHistoryCopy = [...history];
 
-      copyDrawingHistory.pop();
+      drawingHistoryCopy.pop();
 
       const canvas = canvasRef.current;
-      if (!canvas) return copyDrawingHistory;
+      if (!canvas) return drawingHistoryCopy;
 
       const ctx = canvas.getContext("2d");
-      if (!ctx) return copyDrawingHistory;
+      if (!ctx) return drawingHistoryCopy;
 
       // Clear the canvas and redraw the remaining lines
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      copyDrawingHistory.forEach((line) => {
+      drawingHistoryCopy.forEach((line) => {
         ctx.beginPath();
         line.forEach((point, index) => {
           if (index === 0) {
@@ -53,7 +54,7 @@ export const useOnDraw = (onDraw: DrawFunction) => {
         ctx.stroke();
       });
 
-      return copyDrawingHistory;
+      return drawingHistoryCopy;
     });
   }, [drawingHistory]);
 
@@ -62,19 +63,27 @@ export const useOnDraw = (onDraw: DrawFunction) => {
     if (!canvas) return;
 
     const handler = (event: MouseEvent) => {
-      if (!mouseDown) return;
+      if (!mouseDownRef.current) return;
       const currPoint = computePointInCanvas(event);
 
-      const ctx = canvasRef.current?.getContext("2d");
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      const ctx = canvas.getContext("2d");
       if (!ctx || !currPoint) return;
 
-      const currentLine = drawingHistory[drawingHistory.length - 1];
+      const currentLine = [...drawingHistory[drawingHistory.length - 1]];
       currentLine.push(currPoint);
 
       const draw = { ctx, currPoint, prevPoint: prevPoint.current };
 
       onDraw(draw);
       prevPoint.current = currPoint;
+
+      setDrawingHistory((history) => [
+        ...history.slice(0, history.length - 1),
+        currentLine,
+      ]);
     };
 
     const computePointInCanvas = (event: MouseEvent) => {
@@ -89,7 +98,7 @@ export const useOnDraw = (onDraw: DrawFunction) => {
     };
 
     const mouseUpHandler = () => {
-      setMouseDown(false);
+      mouseDownRef.current = false;
       prevPoint.current = null;
     };
 
@@ -110,7 +119,7 @@ export const useOnDraw = (onDraw: DrawFunction) => {
         mouseUpHandlerRef.current as EventListener
       );
     };
-  }, [mouseDown, onDraw, drawingHistory]);
+  }, [onDraw, drawingHistory]);
 
   return { canvasRef, onMouseDown, clear, undo };
 };
