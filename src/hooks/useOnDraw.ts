@@ -12,6 +12,7 @@ export const useOnDraw = (onDraw: DrawFunction) => {
 
   const onMouseDown = React.useCallback(() => {
     mouseDownRef.current = true;
+    // Add empty array on mousedown when drawing, the empty array is the new 'line' used on handler
     setDrawingHistory([...drawingHistory, []]);
   }, [drawingHistory]);
 
@@ -27,36 +28,28 @@ export const useOnDraw = (onDraw: DrawFunction) => {
   }, []);
 
   const undo = React.useCallback(() => {
-    if (!drawingHistory.length) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    setDrawingHistory((history) => {
-      const drawingHistoryCopy = [...history];
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-      drawingHistoryCopy.pop();
+    if (drawingHistory.length === 0) return;
 
-      const canvas = canvasRef.current;
-      if (!canvas) return drawingHistoryCopy;
+    const drawingHistoryCopy = [...drawingHistory];
+    drawingHistoryCopy.pop();
 
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return drawingHistoryCopy;
-
-      // Clear the canvas and redraw the remaining lines
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawingHistoryCopy.forEach((line) => {
-        ctx.beginPath();
-        line.forEach((point, index) => {
-          if (index === 0) {
-            ctx.moveTo(point.x, point.y);
-          } else {
-            ctx.lineTo(point.x, point.y);
-          }
-        });
-        ctx.stroke();
+    // Clear the canvas and redraw the remaining lines
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawingHistoryCopy.forEach((line) => {
+      line.forEach((point, i) => {
+        const prevPoint = i > 0 ? line[i - 1] : null;
+        onDraw({ ctx, currPoint: point, prevPoint });
       });
-
-      return drawingHistoryCopy;
     });
-  }, [drawingHistory]);
+
+    setDrawingHistory(drawingHistoryCopy);
+  }, [drawingHistory, onDraw]);
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
