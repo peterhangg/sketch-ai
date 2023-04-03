@@ -1,7 +1,9 @@
 import React from "react";
 import { Point, DrawFunction } from "@/lib/types";
 
-export const useOnDraw = (onDraw: DrawFunction) => {
+const ROUND = "round";
+
+export const useOnDraw = () => {
   const [drawingHistory, setDrawingHistory] = React.useState<Point[][]>([]);
 
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
@@ -15,6 +17,31 @@ export const useOnDraw = (onDraw: DrawFunction) => {
     // Add empty array on mousedown when drawing, the empty array is the new 'line' used on handler
     setDrawingHistory([...drawingHistory, []]);
   }, [drawingHistory]);
+
+  const drawLine: DrawFunction = React.useCallback(
+    ({ ctx, currPoint, prevPoint, color = "#000000", width = 5 }) => {
+      if (!ctx) return;
+
+      const { x: currX, y: currY } = currPoint;
+      let startingPoint = prevPoint ?? currPoint;
+
+      ctx.beginPath();
+      ctx.lineWidth = width;
+      ctx.strokeStyle = color;
+      ctx.lineCap = ROUND;
+      ctx.lineJoin = ROUND;
+      ctx.moveTo(startingPoint.x, startingPoint.y);
+      ctx.lineTo(currX, currY);
+      ctx.stroke();
+
+      // Fill pixelated line
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(startingPoint.x, startingPoint.y, 2, 0, 2 * Math.PI);
+      ctx.fill();
+    },
+    []
+  );
 
   const clear = React.useCallback(() => {
     const canvas = canvasRef.current;
@@ -44,12 +71,12 @@ export const useOnDraw = (onDraw: DrawFunction) => {
     drawingHistoryCopy.forEach((line) => {
       line.forEach((point, i) => {
         const prevPoint = i > 0 ? line[i - 1] : null;
-        onDraw({ ctx, currPoint: point, prevPoint });
+        drawLine({ ctx, currPoint: point, prevPoint });
       });
     });
 
     setDrawingHistory(drawingHistoryCopy);
-  }, [drawingHistory, onDraw]);
+  }, [drawingHistory, drawLine]);
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -70,7 +97,7 @@ export const useOnDraw = (onDraw: DrawFunction) => {
 
       const draw = { ctx, currPoint, prevPoint: prevPoint.current };
 
-      onDraw(draw);
+      drawLine(draw);
       prevPoint.current = currPoint;
 
       setDrawingHistory((history) => [
@@ -112,7 +139,7 @@ export const useOnDraw = (onDraw: DrawFunction) => {
         mouseUpHandlerRef.current as EventListener
       );
     };
-  }, [onDraw, drawingHistory]);
+  }, [drawLine, drawingHistory]);
 
   return { canvasRef, onMouseDown, clear, undo };
 };

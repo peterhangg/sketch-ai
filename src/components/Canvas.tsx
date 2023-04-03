@@ -1,8 +1,5 @@
 import React from "react";
 import { useOnDraw } from "@/hooks/useOnDraw";
-import { DrawFunction } from "@/lib/types";
-
-const ROUND = "round";
 
 interface CanvasProps {
   width: number;
@@ -10,32 +7,7 @@ interface CanvasProps {
 }
 
 const Canvas = ({ width, height }: CanvasProps) => {
-  const drawLine: DrawFunction = React.useCallback(
-    ({ ctx, currPoint, prevPoint, color = "#000000", width = 5 }) => {
-      if (!ctx) return;
-
-      const { x: currX, y: currY } = currPoint;
-      let startingPoint = prevPoint ?? currPoint;
-
-      ctx.beginPath();
-      ctx.lineWidth = width;
-      ctx.strokeStyle = color;
-      ctx.lineCap = ROUND;
-      ctx.lineJoin = ROUND;
-      ctx.moveTo(startingPoint.x, startingPoint.y);
-      ctx.lineTo(currX, currY);
-      ctx.stroke();
-
-      // Fill pixelated line
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.arc(startingPoint.x, startingPoint.y, 2, 0, 2 * Math.PI);
-      ctx.fill();
-    },
-    []
-  );
-
-  const { canvasRef, onMouseDown, clear, undo } = useOnDraw(drawLine);
+  const { canvasRef, onMouseDown, clear, undo } = useOnDraw();
 
   return (
     <div className="flex flex-col items-center gap-4">
