@@ -4,7 +4,7 @@ interface ColorPickerProps {
   setColor: (color: string) => void;
   color: string;
 }
-const colorPlatte = [
+const colorPalette = [
   "#000000",
   "#808080",
   "#FF0000",
@@ -21,6 +21,7 @@ const colorPlatte = [
 
 const ColorPicker = ({ setColor, color }: ColorPickerProps) => {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
+
   const toggleOpen = () => setIsOpen((prev) => !prev);
 
   const handleColorSelected = (newColor: string) => {
@@ -29,16 +30,16 @@ const ColorPicker = ({ setColor, color }: ColorPickerProps) => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative p-2">
       <div
         className="h-8 w-8 cursor-pointer rounded-full"
         style={{ backgroundColor: color }}
       ></div>
       {isOpen && (
         <div className="absolute z-10 my-2 flex w-32 flex-wrap rounded-md bg-slate-100 py-1 shadow-xl">
-          {colorPlatte.map((color, i) => (
+          {colorPalette.map((color, index) => (
             <div
-              key={i}
+              key={`${color}-${index}`}
               className="m-1 h-6 w-6 cursor-pointer rounded-full"
               style={{
                 backgroundColor: color,

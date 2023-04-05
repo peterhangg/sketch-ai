@@ -14,10 +14,11 @@ const Canvas = ({ width, height }: CanvasProps) => {
     clear,
     undo,
     redo,
-    drawingHistory,
-    redoHistory,
     color,
     setColor,
+    undoHistory,
+    redoHistory,
+    isCanvasEmpty,
   } = useOnDraw();
 
   return (
@@ -29,18 +30,19 @@ const Canvas = ({ width, height }: CanvasProps) => {
         ref={canvasRef}
         onMouseDown={onMouseDown}
       />
-      <div className="flex">
+      <div className="flex items-center bg-slate-100 p-6">
+        <ColorPicker setColor={setColor} color={color} />
         <button
           className="mx-2 w-[200px] rounded border border-gray-400 bg-white px-4 py-2 font-semibold text-gray-800 shadow hover:bg-gray-100 disabled:pointer-events-none disabled:opacity-50"
           onClick={clear}
-          disabled={!drawingHistory.length}
+          disabled={isCanvasEmpty() || !undoHistory.length}
         >
           Clear
         </button>
         <button
           className="mx-2 w-[200px] rounded border border-gray-400 bg-white px-4 py-2 font-semibold text-gray-800 shadow hover:bg-gray-100 disabled:pointer-events-none disabled:opacity-50"
           onClick={undo}
-          disabled={!drawingHistory.length}
+          disabled={!undoHistory.length}
         >
           Undo
         </button>
@@ -48,14 +50,12 @@ const Canvas = ({ width, height }: CanvasProps) => {
           className="mx-2 w-[200px] rounded border border-gray-400 bg-white px-4 py-2 font-semibold text-gray-800 shadow hover:bg-gray-100 disabled:pointer-events-none disabled:opacity-50"
           onClick={redo}
           disabled={
-            (!redoHistory.length && !drawingHistory.length) ||
-            !redoHistory.length
+            (!redoHistory.length && !undoHistory.length) || !redoHistory.length
           }
         >
           Redo
         </button>
       </div>
-      <ColorPicker setColor={setColor} color={color} />
     </div>
   );
 };

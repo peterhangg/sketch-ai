@@ -5,9 +5,8 @@ const ROUND = "round";
 const BLACK = "#000000";
 
 export const useOnDraw = () => {
-  const [drawingHistory, setDrawingHistory] = React.useState<Point[][]>([]);
-  const [undoHistory, setUndoHistory] = React.useState<Point[][]>([]);
-  const [redoHistory, setRedoHistory] = React.useState<Point[][]>([]);
+  const [undoHistory, setUndoHistory] = React.useState<ImageData[]>([]);
+  const [redoHistory, setRedoHistory] = React.useState<ImageData[]>([]);
   const [color, setColor] = React.useState<string>(BLACK);
 
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
@@ -40,9 +39,33 @@ export const useOnDraw = () => {
 
   const onMouseDown = React.useCallback(() => {
     mouseDownRef.current = true;
-    // Add empty array on mousedown when drawing, the empty array is the new 'line' used on handler
-    setDrawingHistory([...drawingHistory, []]);
-  }, [drawingHistory]);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    setUndoHistory((prev) => [...prev, imageData]);
+    // Clear redo stack on new draw action (user hits undo and draws afterwards)
+    setRedoHistory([]);
+  }, []);
+
+  const isCanvasEmpty = React.useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return true;
+
+    const context = canvas.getContext("2d");
+    if (!context) return true;
+
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+
+    for (let i = 0; i < imageData.data.length; i++) {
+      // Check if pixel completely transparency
+      if (imageData.data[i] !== 0) return false;
+    }
+    return true;
+  }, []);
 
   const clear = React.useCallback(() => {
     const canvas = canvasRef.current;
@@ -51,9 +74,12 @@ export const useOnDraw = () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    setDrawingHistory([]);
-    setUndoHistory([]);
+    const currImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    setUndoHistory((prevUndoHistory) => [...prevUndoHistory, currImageData]);
     setRedoHistory([]);
+
+    // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }, []);
 
@@ -63,51 +89,45 @@ export const useOnDraw = () => {
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+    if (undoHistory.length === 0) return;
 
-    if (drawingHistory.length === 0) return;
+    const currImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    setRedoHistory((prevRedoHistory) => [...prevRedoHistory, currImageData]);
 
-    const drawingHistoryCopy = [...drawingHistory];
-    const lastLine = drawingHistoryCopy.pop();
+    const undoHistoryCopy = [...undoHistory];
+    const prevImageData = undoHistoryCopy.pop();
+    setUndoHistory(undoHistoryCopy);
 
-    if (!lastLine) return;
-    setRedoHistory((history) => [...history, lastLine]);
+    if (!prevImageData) return;
 
-    // Clear the canvas and redraw the remaining lines
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawingHistoryCopy.forEach((line) => {
-      line.forEach((point, i) => {
-        const prevPoint = i > 0 ? line[i - 1] : null;
-        drawLine({ ctx, currPoint: point, prevPoint });
-      });
-    });
-
-    setDrawingHistory(drawingHistoryCopy);
-  }, [drawingHistory, drawLine]);
+    ctx.putImageData(prevImageData, 0, 0);
+  }, [undoHistory]);
 
   const redo = React.useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
-
     if (!ctx) return;
-    if (drawingHistory.length === 0 && redoHistory.length === 0) return;
     if (redoHistory.length === 0) return;
 
-    const redoHistoryCopy = [...redoHistory];
-    const lastLine = redoHistoryCopy.pop();
+    const currentImageData = ctx.getImageData(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
 
-    if (!lastLine) return;
+    setUndoHistory((prevUndoHistory) => [...prevUndoHistory, currentImageData]);
+
+    const redoHistoryCopy = [...redoHistory];
+    const prevImageData = redoHistoryCopy.pop();
+
+    if (!prevImageData) return;
 
     setRedoHistory(redoHistoryCopy);
-    setUndoHistory((history) => [...history, lastLine]);
-    setDrawingHistory((history) => [...history, lastLine]);
-
-    lastLine.forEach((point, i) => {
-      const prevPoint = i > 0 ? lastLine[i - 1] : null;
-      drawLine({ ctx, currPoint: point, prevPoint });
-    });
-  }, [drawingHistory, redoHistory, drawLine]);
+    ctx.putImageData(prevImageData, 0, 0);
+  }, [redoHistory]);
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -123,9 +143,6 @@ export const useOnDraw = () => {
       const ctx = canvas.getContext("2d");
       if (!ctx || !currPoint) return;
 
-      const currentLine = [...drawingHistory[drawingHistory.length - 1]];
-      currentLine.push(currPoint);
-
       const drawObj = {
         ctx,
         currPoint,
@@ -134,11 +151,6 @@ export const useOnDraw = () => {
       };
       drawLine(drawObj);
       prevPoint.current = currPoint;
-
-      setDrawingHistory((history) => [
-        ...history.slice(0, history.length - 1),
-        currentLine,
-      ]);
     };
 
     const computePointInCanvas = (event: MouseEvent) => {
@@ -175,18 +187,18 @@ export const useOnDraw = () => {
       window.removeEventListener("mouseup", mouseUpHandler);
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, [drawingHistory, undo, redo, color, drawLine]);
+  }, [color, drawLine, undo, redo]);
 
   return {
     canvasRef,
     onMouseDown,
-    clear,
+    setColor,
     undo,
     redo,
-    drawingHistory,
+    clear,
+    color,
     undoHistory,
     redoHistory,
-    color,
-    setColor,
+    isCanvasEmpty,
   };
 };
