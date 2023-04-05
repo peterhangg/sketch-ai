@@ -2,43 +2,41 @@ import React from "react";
 import { Point, DrawFunction } from "@/lib/types";
 
 const ROUND = "round";
-
-const drawLine: DrawFunction = ({
-  ctx,
-  currPoint,
-  prevPoint,
-  color = "#000000",
-  width = 5,
-}) => {
-  if (!ctx) return;
-
-  const { x: currX, y: currY } = currPoint;
-  let startingPoint = prevPoint ?? currPoint;
-
-  ctx.beginPath();
-  ctx.lineWidth = width;
-  ctx.strokeStyle = color;
-  ctx.lineCap = ROUND;
-  ctx.lineJoin = ROUND;
-  ctx.moveTo(startingPoint.x, startingPoint.y);
-  ctx.lineTo(currX, currY);
-  ctx.stroke();
-
-  // Fill pixelated line
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  ctx.arc(startingPoint.x, startingPoint.y, 2, 0, 2 * Math.PI);
-  ctx.fill();
-};
+const BLACK = "#000000";
 
 export const useOnDraw = () => {
   const [drawingHistory, setDrawingHistory] = React.useState<Point[][]>([]);
   const [undoHistory, setUndoHistory] = React.useState<Point[][]>([]);
   const [redoHistory, setRedoHistory] = React.useState<Point[][]>([]);
+  const [color, setColor] = React.useState<string>(BLACK);
 
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const prevPoint = React.useRef<Point | null>(null);
   const mouseDownRef = React.useRef<boolean>(false);
+
+  const drawLine: DrawFunction = React.useCallback(
+    ({ ctx, currPoint, prevPoint, color, width = 5 }) => {
+      if (!ctx) return;
+      const { x: currX, y: currY } = currPoint;
+      let startingPoint = prevPoint ?? currPoint;
+
+      ctx.beginPath();
+      ctx.lineWidth = width;
+      ctx.strokeStyle = color ?? BLACK;
+      ctx.lineCap = ROUND;
+      ctx.lineJoin = ROUND;
+      ctx.moveTo(startingPoint.x, startingPoint.y);
+      ctx.lineTo(currX, currY);
+      ctx.stroke();
+
+      // Fill pixelated line
+      ctx.fillStyle = color ?? BLACK;
+      ctx.beginPath();
+      ctx.arc(startingPoint.x, startingPoint.y, 2, 0, 2 * Math.PI);
+      ctx.fill();
+    },
+    []
+  );
 
   const onMouseDown = React.useCallback(() => {
     mouseDownRef.current = true;
@@ -55,6 +53,7 @@ export const useOnDraw = () => {
 
     setDrawingHistory([]);
     setUndoHistory([]);
+    setRedoHistory([]);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }, []);
 
@@ -83,7 +82,7 @@ export const useOnDraw = () => {
     });
 
     setDrawingHistory(drawingHistoryCopy);
-  }, [drawingHistory]);
+  }, [drawingHistory, drawLine]);
 
   const redo = React.useCallback(() => {
     const canvas = canvasRef.current;
@@ -108,7 +107,7 @@ export const useOnDraw = () => {
       const prevPoint = i > 0 ? lastLine[i - 1] : null;
       drawLine({ ctx, currPoint: point, prevPoint });
     });
-  }, [drawingHistory, redoHistory]);
+  }, [drawingHistory, redoHistory, drawLine]);
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -127,9 +126,13 @@ export const useOnDraw = () => {
       const currentLine = [...drawingHistory[drawingHistory.length - 1]];
       currentLine.push(currPoint);
 
-      const draw = { ctx, currPoint, prevPoint: prevPoint.current };
-
-      drawLine(draw);
+      const drawObj = {
+        ctx,
+        currPoint,
+        prevPoint: prevPoint.current,
+        color,
+      };
+      drawLine(drawObj);
       prevPoint.current = currPoint;
 
       setDrawingHistory((history) => [
@@ -172,7 +175,7 @@ export const useOnDraw = () => {
       window.removeEventListener("mouseup", mouseUpHandler);
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, [drawingHistory, undo, redo]);
+  }, [drawingHistory, undo, redo, color, drawLine]);
 
   return {
     canvasRef,
@@ -183,5 +186,7 @@ export const useOnDraw = () => {
     drawingHistory,
     undoHistory,
     redoHistory,
+    color,
+    setColor,
   };
 };

@@ -1,4 +1,5 @@
 import React from "react";
+import ColorPicker from "./ColorPicker";
 import { useOnDraw } from "@/hooks/useOnDraw";
 
 interface CanvasProps {
@@ -15,6 +16,8 @@ const Canvas = ({ width, height }: CanvasProps) => {
     redo,
     drawingHistory,
     redoHistory,
+    color,
+    setColor,
   } = useOnDraw();
 
   return (
@@ -52,6 +55,7 @@ const Canvas = ({ width, height }: CanvasProps) => {
           Redo
         </button>
       </div>
+      <ColorPicker setColor={setColor} color={color} />
     </div>
   );
 };
