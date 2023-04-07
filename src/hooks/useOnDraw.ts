@@ -1,8 +1,6 @@
 import React from "react";
 import { Point, DrawFunction } from "@/lib/types";
-
-const ROUND = "round";
-const BLACK = "#000000";
+import { ROUND, BLACK } from "@/lib/constants";
 
 export const useOnDraw = () => {
   const [undoHistory, setUndoHistory] = React.useState<ImageData[]>([]);
