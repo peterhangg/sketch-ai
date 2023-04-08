@@ -5,9 +5,10 @@ import { useOnDraw } from "@/hooks/useOnDraw";
 interface CanvasProps {
   width: number;
   height: number;
+  setSketch: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const Canvas = ({ width, height }: CanvasProps) => {
+const Canvas = ({ width, height, setSketch }: CanvasProps) => {
   const {
     canvasRef,
     onMouseDown,
@@ -24,11 +25,11 @@ const Canvas = ({ width, height }: CanvasProps) => {
   const downloadHandler = (
     chartRef: React.MutableRefObject<HTMLCanvasElement | null>
   ) => {
-    if (!canvasRef.current) return;
+    if (!chartRef.current) return;
 
     const newCanvas = document.createElement("canvas");
-    newCanvas.width = canvasRef.current.width;
-    newCanvas.height = canvasRef.current.height;
+    newCanvas.width = chartRef.current.width;
+    newCanvas.height = chartRef.current.height;
 
     const ctx = newCanvas.getContext("2d");
     if (!ctx) return;
@@ -36,14 +37,21 @@ const Canvas = ({ width, height }: CanvasProps) => {
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
     // Draw the original canvas on the new canvas
-    ctx.drawImage(canvasRef.current, 0, 0);
+    ctx.drawImage(chartRef.current, 0, 0);
 
     const downloadLink = document.createElement("a");
     downloadLink.setAttribute("download", "sketch.png");
 
     const imageUrl = newCanvas.toDataURL("image/png");
+    setSketch(imageUrl);
     downloadLink.setAttribute("href", imageUrl);
     downloadLink.click();
+  };
+
+  const handleCanvasChange = async () => {
+    if (!canvasRef.current) return;
+    const imageUrl = await canvasRef.current.toDataURL("image/png");
+    setSketch(imageUrl);
   };
 
   return (
@@ -54,6 +62,7 @@ const Canvas = ({ width, height }: CanvasProps) => {
         height={height}
         ref={canvasRef}
         onMouseDown={onMouseDown}
+        onMouseUp={handleCanvasChange}
       />
       <div className="flex items-center bg-slate-100 p-6">
         <ColorPicker setColor={setColor} color={color} />

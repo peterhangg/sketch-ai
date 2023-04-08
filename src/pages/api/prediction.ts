@@ -1,4 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import {
+  API_KEY,
+  REPLICATE_API_BASE_URL,
+  FAILED,
+  MODEL_VERSION,
+  SUCCEEDED,
+} from "@/lib/constants";
 
 interface ReplicateApiRequest extends NextApiRequest {
   body: {
@@ -7,16 +14,13 @@ interface ReplicateApiRequest extends NextApiRequest {
   };
 }
 
-const SUCCEEDED = "succeeded";
-const FAILED = "failed";
-const API_URL = "https://api.replicate.com/v1/predictions";
-const MODEL_VERSION =
-  "435061a1b5a4c1e26740464bf786efdfa9cb3a3ac488595a2de23e143fdb0117";
-const API_KEY = process.env.REPLICATE_API_KEY;
-
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function getGeneratedImage(responseUrl: string): Promise<string[]> {
+  if (!responseUrl) {
+    throw new Error("Response url from submitted sketch is missing");
+  }
+
   while (true) {
     const response = await fetch(responseUrl, {
       method: "GET",
@@ -25,7 +29,6 @@ async function getGeneratedImage(responseUrl: string): Promise<string[]> {
         Authorization: `Token ${API_KEY}`,
       },
     });
-
     const data = await response.json();
 
     if (data.status === SUCCEEDED) {
@@ -33,7 +36,7 @@ async function getGeneratedImage(responseUrl: string): Promise<string[]> {
     } else if (data.status === FAILED) {
       throw new Error("Failed to generate image");
     } else {
-      await sleep(2000);
+      await sleep(1000);
     }
   }
 }
@@ -49,18 +52,18 @@ export default async function handler(
   const { imageUrl, prompt } = req.body;
 
   if (!imageUrl) {
-    return res.status(400).json({ error: "Please provide an image URL" });
+    return res.status(400).json({ message: "Please provide an image URL" });
   }
 
   if (!prompt) {
     return res
       .status(400)
-      .json({ error: "Please provide a prompt for your sketch" });
+      .json({ message: "Please provide a prompt for your sketch" });
   }
 
   if (req.method === "POST") {
     try {
-      let response = await fetch(API_URL, {
+      let response = await fetch(`${REPLICATE_API_BASE_URL}/v1/predictions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -73,16 +76,17 @@ export default async function handler(
       });
 
       const { urls } = await response.json();
-      const generatedImage = await getGeneratedImage(urls.get);
+      const generatedImages = await getGeneratedImage(urls?.get);
+      const [_negativePromptImage, userPromptImage] = generatedImages;
 
-      return res.status(200).json({ data: generatedImage });
+      return res.status(200).json(userPromptImage);
     } catch (error) {
       if (error instanceof Error) {
-        return res.status(400).json({ error: error.message });
+        return res.status(400).json({ message: error.message });
       }
       return res
         .status(404)
-        .json({ error: "Something went wrong during the request" });
+        .json({ message: "Something went wrong during the request" });
     }
   }
 }
