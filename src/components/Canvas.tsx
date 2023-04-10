@@ -1,14 +1,17 @@
 import React from "react";
 import ColorPicker from "./ColorPicker";
 import { useOnDraw } from "@/hooks/useOnDraw";
+import { useDrawStore } from "@/state/store";
 
 interface CanvasProps {
   width: number;
   height: number;
-  setSketch: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const Canvas = ({ width, height, setSketch }: CanvasProps) => {
+const Canvas = ({ width, height }: CanvasProps) => {
+  const store = useDrawStore((state) => state);
+  const { setSketch } = store;
+
   const {
     canvasRef,
     onMouseDown,

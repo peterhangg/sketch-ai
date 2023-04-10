@@ -2,14 +2,22 @@ import React from "react";
 import Head from "next/head";
 import Image from "next/image";
 import Canvas from "@/components/Canvas";
+import { useDrawStore } from "@/state/store";
 
 export default function Home() {
-  const [prompt, setPrompt] = React.useState<string>("");
-  const [sketch, setSketch] = React.useState<string>("");
-  const [generatedImage, setGeneratedImage] = React.useState<string>("");
-  const [loading, setLoading] = React.useState<boolean>(false);
-  const [submitted, setSubmitted] = React.useState<boolean>(false);
-  const [error, setError] = React.useState<{ message: string } | null>(null);
+  const store = useDrawStore((state) => state);
+  const {
+    prompt,
+    sketch,
+    generatedImage,
+    setGeneratedImage,
+    loading,
+    setLoading,
+    error,
+    setError,
+    submitted,
+    setSubmitted,
+  } = store;
 
   const generatePhoto = async (imageUrl: string, prompt: string) => {
     try {
@@ -57,14 +65,14 @@ export default function Home() {
       <main className="flex h-screen w-screen flex-col items-center justify-center gap-5">
         <h1>Sketch AI</h1>
         <div>
-          <Canvas width={800} height={600} setSketch={setSketch} />
+          <Canvas width={800} height={600} />
           <form className="my-3 flex p-4" onSubmit={handleSubmit}>
             <input
               type="text"
               className="flex-1 rounded-l-md border border-gray-300 px-4 py-2"
               placeholder="Describe the image you want to create..."
               name="prompt"
-              onChange={(e) => setPrompt(e.target.value)}
+              onChange={(e) => store.setPrompt(e.target.value)}
               value={prompt}
             />
             <button
