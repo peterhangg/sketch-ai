@@ -7,6 +7,7 @@ interface ColorPickerProps {
 const colorPalette = [
   "#000000",
   "#808080",
+  "#964B00",
   "#FF0000",
   "#FF7F00",
   "#FFFF00",
@@ -14,7 +15,6 @@ const colorPalette = [
   "#00FFFF",
   "#0000FF",
   "#FF00FF",
-  "#4B0082",
   "#8B00FF",
   "#FFFFFF",
 ];
