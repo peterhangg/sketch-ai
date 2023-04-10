@@ -16,12 +16,40 @@ interface ReplicateApiRequest extends NextApiRequest {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+async function pollUntilDone<T>(
+  fn: () => Promise<T>,
+  intervalMs = 1000,
+  timeoutMs = 30000
+): Promise<T> {
+  const start = Date.now();
+
+  while (true) {
+    try {
+      const result = await fn();
+      return result;
+    } catch (error) {
+      if (Date.now() - start > timeoutMs) {
+        if (error instanceof Error) {
+          throw new Error(
+            `Function timed out after ${timeoutMs} ms: ${error.message}`
+          );
+        } else {
+          throw new Error(
+            `Function timed out after ${timeoutMs} ms: Unknown error occurred`
+          );
+        }
+      }
+    }
+    await sleep(intervalMs);
+  }
+}
+
 async function getGeneratedImage(responseUrl: string): Promise<string[]> {
   if (!responseUrl) {
     throw new Error("Response url from submitted sketch is missing");
   }
 
-  while (true) {
+  const fetchData = async (): Promise<string[]> => {
     const response = await fetch(responseUrl, {
       method: "GET",
       headers: {
@@ -36,9 +64,12 @@ async function getGeneratedImage(responseUrl: string): Promise<string[]> {
     } else if (data.status === FAILED) {
       throw new Error("Failed to generate image");
     } else {
-      await sleep(1000);
+      throw new Error("Still generating image");
     }
-  }
+  };
+
+  const generatedImage = await pollUntilDone(fetchData);
+  return generatedImage;
 }
 
 export default async function handler(
