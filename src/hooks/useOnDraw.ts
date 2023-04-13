@@ -40,7 +40,7 @@ export const useOnDraw = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
 
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -53,7 +53,7 @@ export const useOnDraw = () => {
     const canvas = canvasRef.current;
     if (!canvas) return true;
 
-    const context = canvas.getContext("2d");
+    const context = canvas.getContext("2d", { willReadFrequently: true });
     if (!context) return true;
 
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
@@ -69,7 +69,7 @@ export const useOnDraw = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
 
     const currImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -85,7 +85,7 @@ export const useOnDraw = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
     if (undoHistory.length === 0) return;
 
@@ -105,7 +105,7 @@ export const useOnDraw = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
     if (redoHistory.length === 0) return;
 
@@ -138,7 +138,7 @@ export const useOnDraw = () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
 
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
       if (!ctx || !currPoint) return;
 
       const drawObj = {

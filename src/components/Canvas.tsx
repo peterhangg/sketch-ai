@@ -1,23 +1,28 @@
 import React from "react";
-import ColorPicker from "./ColorPicker";
+import {
+  ArrowUturnLeftIcon,
+  ArrowUturnRightIcon,
+  TrashIcon,
+  ArrowDownTrayIcon,
+} from "@heroicons/react/24/solid";
+import { CanvasButton } from "./CanvasButton";
+import { ColorPicker } from "./ColorPicker";
 import { useOnDraw } from "@/hooks/useOnDraw";
 import { useDrawStore } from "@/state/store";
 
-interface CanvasProps {
-  width: number;
-  height: number;
-}
+const MAX_WIDTH = 800;
+const MAX_HEIGHT = 800;
 
-const Canvas = ({ width, height }: CanvasProps) => {
+export function Canvas() {
   const store = useDrawStore((state) => state);
   const { setSketch } = store;
 
   const {
     canvasRef,
     onMouseDown,
-    clear,
     undo,
     redo,
+    clear,
     color,
     setColor,
     undoHistory,
@@ -34,7 +39,7 @@ const Canvas = ({ width, height }: CanvasProps) => {
     newCanvas.width = chartRef.current.width;
     newCanvas.height = chartRef.current.height;
 
-    const ctx = newCanvas.getContext("2d");
+    const ctx = newCanvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
 
     ctx.fillStyle = "#ffffff";
@@ -57,50 +62,79 @@ const Canvas = ({ width, height }: CanvasProps) => {
     setSketch(imageUrl);
   };
 
+  const [canvasSize, setCanvasSize] = React.useState({
+    width: MAX_WIDTH,
+    height: MAX_HEIGHT,
+  });
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const canvasParent = canvas.parentElement;
+
+        if (canvasParent) {
+          const { width, height } = canvasParent.getBoundingClientRect();
+          const resizeHeight = height > MAX_HEIGHT ? MAX_HEIGHT : height;
+          const resizeWidth = width > MAX_WIDTH ? MAX_WIDTH : width;
+
+          canvas.width = resizeWidth;
+          canvas.height = resizeHeight;
+          setCanvasSize({
+            width: resizeWidth,
+            height: resizeHeight,
+          });
+        }
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, [canvasRef]);
+
   return (
-    <div className="flex flex-col items-center gap-4">
-      <canvas
-        className="rounded-md border border-black"
-        width={width}
-        height={height}
-        ref={canvasRef}
-        onMouseDown={onMouseDown}
-        onMouseUp={handleCanvasChange}
-      />
-      <div className="flex items-center bg-slate-100 p-6">
+    <div className="flex max-w-[700px] flex-col items-center gap-2">
+      <div className="flex w-full items-center justify-center p-2">
+        <canvas
+          className="rounded-md border border-black"
+          width={canvasSize.width}
+          height={canvasSize.height}
+          ref={canvasRef}
+          onMouseDown={onMouseDown}
+          onMouseUp={handleCanvasChange}
+        />
+      </div>
+      <div className="flex w-full items-center justify-between p-2">
         <ColorPicker setColor={setColor} color={color} />
-        <button
-          className="mx-2 w-[200px] rounded border border-gray-400 bg-white px-4 py-2 font-semibold text-gray-800 shadow hover:bg-gray-100 disabled:pointer-events-none disabled:opacity-50"
-          onClick={() => downloadHandler(canvasRef)}
-        >
-          download
-        </button>
-        <button
-          className="mx-2 w-[200px] rounded border border-gray-400 bg-white px-4 py-2 font-semibold text-gray-800 shadow hover:bg-gray-100 disabled:pointer-events-none disabled:opacity-50"
-          onClick={clear}
-          disabled={isCanvasEmpty() || !undoHistory.length}
-        >
-          Clear
-        </button>
-        <button
-          className="mx-2 w-[200px] rounded border border-gray-400 bg-white px-4 py-2 font-semibold text-gray-800 shadow hover:bg-gray-100 disabled:pointer-events-none disabled:opacity-50"
-          onClick={undo}
-          disabled={!undoHistory.length}
-        >
-          Undo
-        </button>
-        <button
-          className="mx-2 w-[200px] rounded border border-gray-400 bg-white px-4 py-2 font-semibold text-gray-800 shadow hover:bg-gray-100 disabled:pointer-events-none disabled:opacity-50"
-          onClick={redo}
-          disabled={
-            (!redoHistory.length && !undoHistory.length) || !redoHistory.length
-          }
-        >
-          Redo
-        </button>
+        <div>
+          <CanvasButton
+            className="mx-2"
+            icon={<ArrowUturnLeftIcon />}
+            onClick={undo}
+            disabled={!undoHistory.length}
+          />
+          <CanvasButton
+            icon={<ArrowUturnRightIcon />}
+            onClick={redo}
+            disabled={
+              (!redoHistory.length && !undoHistory.length) ||
+              !redoHistory.length
+            }
+          />
+          <CanvasButton
+            className="mx-2"
+            icon={<TrashIcon />}
+            onClick={clear}
+            disabled={isCanvasEmpty() || !undoHistory.length}
+          />
+          <CanvasButton
+            icon={<ArrowDownTrayIcon />}
+            onClick={() => downloadHandler(canvasRef)}
+          />
+        </div>
       </div>
     </div>
   );
-};
-
-export default Canvas;
+}

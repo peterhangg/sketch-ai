@@ -1,9 +1,11 @@
 import React from "react";
+import { PaintBrushIcon } from "@heroicons/react/24/solid";
 
 interface ColorPickerProps {
   setColor: (color: string) => void;
   color: string;
 }
+
 const colorPalette = [
   "#000000",
   "#808080",
@@ -16,10 +18,10 @@ const colorPalette = [
   "#0000FF",
   "#FF00FF",
   "#8B00FF",
-  "#FFFFFF",
+  "#aa00aa",
 ];
 
-const ColorPicker = ({ setColor, color }: ColorPickerProps) => {
+export const ColorPicker = ({ setColor, color }: ColorPickerProps) => {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
 
   const toggleOpen = () => setIsOpen((prev) => !prev);
@@ -31,10 +33,9 @@ const ColorPicker = ({ setColor, color }: ColorPickerProps) => {
 
   return (
     <div className="relative p-2">
-      <div
-        className="h-8 w-8 cursor-pointer rounded-full"
-        style={{ backgroundColor: color }}
-      ></div>
+      <div className="h-6 w-6 cursor-pointer" style={{ color: color }}>
+        <PaintBrushIcon />
+      </div>
       {isOpen && (
         <div className="absolute z-10 my-2 flex w-32 flex-wrap rounded-md bg-slate-100 py-1 shadow-xl">
           {colorPalette.map((color, index) => (
@@ -56,5 +57,3 @@ const ColorPicker = ({ setColor, color }: ColorPickerProps) => {
     </div>
   );
 };
-
-export default ColorPicker;

@@ -1,14 +1,16 @@
 import React from "react";
-import * as z from "zod";
+import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useDrawStore } from "@/state/store";
 import { promptSchema } from "@/lib/validations";
 import { ErrorMessage } from "./ui/ErrorMessage";
+import { Input } from "./ui/Input";
+import { Button } from "./ui/Button";
 
 type FormData = z.infer<typeof promptSchema>;
 
-const PromptForm = () => {
+export function PromptForm() {
   const store = useDrawStore((state) => state);
   const {
     sketch,
@@ -68,25 +70,19 @@ const PromptForm = () => {
   };
 
   return (
-    <form className="my-3 flex flex-col p-4" onSubmit={handleSubmit(onSubmit)}>
+    <form className="my-3 flex flex-col p-2" onSubmit={handleSubmit(onSubmit)}>
       <div className="flex flex-1">
-        <input
+        <Input
           id="prompt"
-          type="text"
-          className="flex-1 rounded-l-md border border-gray-300 px-4 py-2"
+          className="rounded-r-none"
           placeholder="Describe the image you want to create..."
           {...register("prompt")}
         />
-        <button
-          className="rounded-r-md bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 disabled:pointer-events-none disabled:opacity-50"
-          disabled={loading}
-        >
+        <Button className="rounded-l-none" size="lg" disabled={loading}>
           Submit
-        </button>
+        </Button>
       </div>
       {errors?.prompt && <ErrorMessage message={errors.prompt.message} />}
     </form>
   );
-};
-
-export default PromptForm;
+}
