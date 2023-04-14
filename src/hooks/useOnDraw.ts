@@ -1,5 +1,5 @@
 import React from "react";
-import { Point, DrawFunction } from "@/lib/types";
+import { Point, Draw } from "@/lib/types";
 import { ROUND, BLACK } from "@/lib/constants";
 
 export const useOnDraw = () => {
@@ -11,8 +11,8 @@ export const useOnDraw = () => {
   const prevPoint = React.useRef<Point | null>(null);
   const mouseDownRef = React.useRef<boolean>(false);
 
-  const drawLine: DrawFunction = React.useCallback(
-    ({ ctx, currPoint, prevPoint, color, width = 5 }) => {
+  const draw = React.useCallback(
+    ({ ctx, currPoint, prevPoint, color, width = 5 }: Draw) => {
       if (!ctx) return;
       const { x: currX, y: currY } = currPoint;
       let startingPoint = prevPoint ?? currPoint;
@@ -147,7 +147,7 @@ export const useOnDraw = () => {
         prevPoint: prevPoint.current,
         color,
       };
-      drawLine(drawObj);
+      draw(drawObj);
       prevPoint.current = currPoint;
     };
 
@@ -185,7 +185,7 @@ export const useOnDraw = () => {
       window.removeEventListener("mouseup", mouseUpHandler);
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, [color, drawLine, undo, redo]);
+  }, [color, draw, undo, redo]);
 
   return {
     canvasRef,

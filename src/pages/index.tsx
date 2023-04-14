@@ -1,12 +1,13 @@
 import React from "react";
 import Head from "next/head";
 import Image from "next/image";
+import { useDrawStore } from "@/state/store";
 import { Canvas } from "@/components/Canvas";
-import { Spinner } from "@/components/ui/Spinner";
 import { PromptForm } from "@/components/PromptForm";
 import { Header } from "@/components/ui/Header";
 import { Container } from "@/components/ui/Container";
-import { useDrawStore } from "@/state/store";
+import { Spinner } from "@/components/ui/Spinner";
+import { Footer } from "@/components/ui/Footer";
 
 export default function Home() {
   const store = useDrawStore((state) => state);
@@ -23,39 +24,45 @@ export default function Home() {
       <Container>
         <Header />
         <main className="flex flex-1 flex-col items-center justify-center">
-          <h1 className="text-2xl">
-            Turn your sketches into AI generated images
-          </h1>
-          <div className="mt-3 p-2">
-            <Canvas />
-            <PromptForm />
-          </div>
-          <div className="flex w-[80%] justify-center p-2">
-            <div className="flex basis-2/4 items-center justify-center">
-              {sketch && submitted && (
-                <Image
-                  alt="sketch"
-                  src={sketch}
-                  className="rounded-2xl p-2"
-                  width={475}
-                  height={475}
-                />
-              )}
-            </div>
-            <div className="flex basis-2/4 items-center justify-center">
-              {loading && <Spinner />}
-              {generatedImage && !loading && (
-                <Image
-                  alt="generated image"
-                  src={generatedImage}
-                  className="rounded-2xl p-2"
-                  width={475}
-                  height={475}
-                />
-              )}
-            </div>
-          </div>
+          {!submitted ? (
+            <>
+              <h1 className="text-2xl">
+                Turn your sketches into AI generated images
+              </h1>
+              <div className="mt-3 p-2">
+                <Canvas />
+                <PromptForm />
+              </div>
+            </>
+          ) : (
+            <>
+              <h1 className="mb-10 text-2xl">AI Generated Image Results:</h1>
+              <div className="container flex w-[80%] justify-around p-2">
+                {sketch && (
+                  <Image
+                    alt="sketch"
+                    src={sketch}
+                    className="rounded-2xl border border-slate-900"
+                    unoptimized={true}
+                    width={475}
+                    height={475}
+                  />
+                )}
+                {loading && <Spinner />}
+                {generatedImage && !loading && (
+                  <Image
+                    alt="generated image"
+                    src={generatedImage}
+                    className="rounded-2xl border border-slate-900"
+                    width={475}
+                    height={475}
+                  />
+                )}
+              </div>
+            </>
+          )}
         </main>
+        <Footer />
       </Container>
     </>
   );
