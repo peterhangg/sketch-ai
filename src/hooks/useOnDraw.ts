@@ -1,5 +1,5 @@
 import React from "react";
-import { Point, DrawFunction } from "@/lib/types";
+import { Point, Draw } from "@/lib/types";
 import { ROUND, BLACK } from "@/lib/constants";
 
 export const useOnDraw = () => {
@@ -11,8 +11,8 @@ export const useOnDraw = () => {
   const prevPoint = React.useRef<Point | null>(null);
   const mouseDownRef = React.useRef<boolean>(false);
 
-  const drawLine: DrawFunction = React.useCallback(
-    ({ ctx, currPoint, prevPoint, color, width = 5 }) => {
+  const draw = React.useCallback(
+    ({ ctx, currPoint, prevPoint, color, width = 5 }: Draw) => {
       if (!ctx) return;
       const { x: currX, y: currY } = currPoint;
       let startingPoint = prevPoint ?? currPoint;
@@ -40,7 +40,7 @@ export const useOnDraw = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
 
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -53,7 +53,7 @@ export const useOnDraw = () => {
     const canvas = canvasRef.current;
     if (!canvas) return true;
 
-    const context = canvas.getContext("2d");
+    const context = canvas.getContext("2d", { willReadFrequently: true });
     if (!context) return true;
 
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
@@ -69,7 +69,7 @@ export const useOnDraw = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
 
     const currImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -85,7 +85,7 @@ export const useOnDraw = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
     if (undoHistory.length === 0) return;
 
@@ -105,7 +105,7 @@ export const useOnDraw = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
     if (redoHistory.length === 0) return;
 
@@ -138,7 +138,7 @@ export const useOnDraw = () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
 
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
       if (!ctx || !currPoint) return;
 
       const drawObj = {
@@ -147,7 +147,7 @@ export const useOnDraw = () => {
         prevPoint: prevPoint.current,
         color,
       };
-      drawLine(drawObj);
+      draw(drawObj);
       prevPoint.current = currPoint;
     };
 
@@ -185,7 +185,7 @@ export const useOnDraw = () => {
       window.removeEventListener("mouseup", mouseUpHandler);
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, [color, drawLine, undo, redo]);
+  }, [color, draw, undo, redo]);
 
   return {
     canvasRef,

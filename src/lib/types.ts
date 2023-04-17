@@ -7,6 +7,3 @@ export type Draw = {
   color?: string;
   width?: number;
 };
-export interface DrawFunction {
-  (params: Draw): void;
-}
