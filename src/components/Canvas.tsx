@@ -95,7 +95,7 @@ export function Canvas() {
   }, [canvasRef]);
 
   return (
-    <div className="flex max-w-[700px] flex-col items-center gap-2">
+    <div className="flex max-w-[700px] flex-col items-center">
       <div className="flex w-full items-center justify-center p-2">
         <canvas
           className="rounded-md border border-black"
@@ -106,7 +106,7 @@ export function Canvas() {
           onMouseUp={handleCanvasChange}
         />
       </div>
-      <div className="flex w-full items-center justify-between p-2">
+      <div className="flex w-full items-center justify-between px-2 pb-2">
         <ColorPicker setColor={setColor} color={color} />
         <div>
           <CanvasButton

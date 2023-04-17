@@ -2,6 +2,7 @@ import React from "react";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { motion } from "framer-motion";
 import { useDrawStore } from "@/state/store";
 import { promptSchema } from "@/lib/validations";
 import { ErrorMessage } from "./ui/ErrorMessage";
@@ -71,7 +72,17 @@ export function PromptForm() {
 
   return (
     <form className="my-3 flex flex-col p-2" onSubmit={handleSubmit(onSubmit)}>
-      <div className="flex flex-1">
+      <motion.div
+        className="flex flex-1"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.5 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+        variants={{
+          hidden: { opacity: 0, x: 50 },
+          visible: { opacity: 1, x: 0 },
+        }}
+      >
         <Input
           id="prompt"
           className="rounded-r-none"
@@ -81,7 +92,7 @@ export function PromptForm() {
         <Button className="rounded-l-none" size="lg" disabled={loading}>
           Submit
         </Button>
-      </div>
+      </motion.div>
       {errors?.prompt && <ErrorMessage message={errors.prompt.message} />}
     </form>
   );
