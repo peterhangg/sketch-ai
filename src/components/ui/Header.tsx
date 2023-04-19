@@ -1,10 +1,12 @@
 import React from "react";
-import { motion } from "framer-motion";
 import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { buttonStyles } from "./Button";
 
 export function Header() {
+  const { data: session } = useSession();
   return (
     <motion.header
       className="container sticky top-0 z-50 mx-auto bg-white px-4"
@@ -21,9 +23,20 @@ export function Header() {
         <Link className="text-lg" href="/">
           Sketch AI
         </Link>
-        <Link href="/login" className={cn(buttonStyles({ size: "lg" }))}>
-          Login
-        </Link>
+        {session ? (
+          <button
+            className={cn(buttonStyles({ size: "lg" }))}
+            onClick={() => {
+              signOut();
+            }}
+          >
+            Sign Out
+          </button>
+        ) : (
+          <Link href="/auth/login" className={cn(buttonStyles({ size: "lg" }))}>
+            Login
+          </Link>
+        )}
       </nav>
     </motion.header>
   );

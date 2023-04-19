@@ -8,7 +8,7 @@ type Props = {
 
 export function Container({ className, children }: Props) {
   return (
-    <div className={cn("flex min-h-screen w-screen flex-col", className)}>
+    <div className={cn("flex h-screen w-screen flex-col", className)}>
       {children}
     </div>
   );

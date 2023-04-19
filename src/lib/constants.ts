@@ -8,3 +8,4 @@ export const API_KEY = process.env.REPLICATE_API_KEY;
 
 export const ROUND = "round";
 export const BLACK = "#000000";
+export const GOOGLE = "google";
