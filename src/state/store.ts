@@ -13,6 +13,7 @@ interface IDrawStore {
   setLoading: (payload: boolean) => void;
   setError: (payload: { message: string }) => void;
   setSubmitted: (submittedState: boolean) => void;
+  reset: () => void;
 }
 
 const initialState = {
@@ -61,6 +62,14 @@ export const useDrawStore = create<IDrawStore>(
       return set((state) => ({
         ...state,
         error,
+      }));
+    },
+    reset: () => {
+      return set((state) => ({
+        ...state,
+        submitted: false,
+        generatedImage: "",
+        sketch: "",
       }));
     },
   })

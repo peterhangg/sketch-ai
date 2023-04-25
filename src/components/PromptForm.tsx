@@ -5,6 +5,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { motion } from "framer-motion";
 import { useDrawStore } from "@/state/store";
 import { promptSchema } from "@/lib/validations";
+import { blobUrlToDataURL } from "@/lib/utils";
 import { ErrorMessage } from "./ui/ErrorMessage";
 import { Input } from "./ui/Input";
 import { Button } from "./ui/Button";
@@ -20,6 +21,7 @@ export function PromptForm() {
     setLoading,
     setError,
     setSubmitted,
+    setPrompt,
   } = store;
 
   const {
@@ -33,19 +35,23 @@ export function PromptForm() {
     },
   });
 
-  const generatePhoto = async (imageUrl: string, prompt: string) => {
+  const generatePhoto = async (
+    imageUrl: string,
+    prompt: string
+  ): Promise<void> => {
     try {
-      const res = await fetch("/api/prediction", {
+      const sketchDataUrl = await blobUrlToDataURL(imageUrl);
+      const response = await fetch("/api/prediction", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ imageUrl, prompt }),
+        body: JSON.stringify({ imageUrl: sketchDataUrl, prompt }),
       });
 
-      const data = await res.json();
+      const data = await response.json();
 
-      if (!res.ok) {
+      if (!response.ok) {
         setError(data);
         return;
       }
@@ -61,12 +67,13 @@ export function PromptForm() {
   const onSubmit: SubmitHandler<FormData> = (
     data,
     event?: React.BaseSyntheticEvent
-  ) => {
+  ): void => {
     event?.preventDefault();
-    if (loading) return;
+    if (loading || !sketch || !data) return;
 
     setLoading(true);
     setSubmitted(true);
+    setPrompt(data.prompt);
     generatePhoto(sketch, data.prompt);
   };
 

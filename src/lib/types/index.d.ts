@@ -1,3 +1,5 @@
+import { DefaultSession } from "next-auth";
+
 export type Point = { x: number; y: number };
 
 export type Draw = {
@@ -6,4 +8,8 @@ export type Draw = {
   prevPoint: Point | null;
   color?: string;
   width?: number;
+};
+
+export type User = DefaultSession["user"] & {
+  id: string;
 };

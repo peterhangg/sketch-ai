@@ -1,7 +1,9 @@
 import { NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import GoogleProvider from "next-auth/providers/google";
+import { getServerSession } from "next-auth";
 import { prisma } from "./prisma";
+import { GetServerSessionContext } from "./types/nextauth";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -52,4 +54,12 @@ export const authOptions: NextAuthOptions = {
     },
   },
   debug: process.env.NODE_ENV === "development",
+};
+
+/**
+ * Wrapper for 'getServerSession' so that you don't need to import the 'authOptions' in every file.
+ * @see https://next-auth.js.org/configuration/nextjs
+ */
+export const getServerAuthSession = (ctx: GetServerSessionContext) => {
+  return getServerSession(ctx.req, ctx.res, authOptions);
 };

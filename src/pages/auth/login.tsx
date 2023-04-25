@@ -1,6 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { GetServerSidePropsContext } from "next";
 import { signIn } from "next-auth/react";
 import { motion } from "framer-motion";
 import { ChevronLeftIcon } from "@heroicons/react/24/solid";
@@ -8,6 +9,7 @@ import { Container } from "@/components/ui/Container";
 import { buttonStyles } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { GOOGLE } from "@/lib/constants";
+import { getServerAuthSession } from "@/lib/auth";
 import GoogleIcon from "../../../public/google.png";
 
 export default function LoginPage() {
@@ -62,4 +64,21 @@ export default function LoginPage() {
       </motion.div>
     </Container>
   );
+}
+
+export async function getServerSideProps(ctx: GetServerSidePropsContext) {
+  const session = await getServerAuthSession(ctx);
+
+  if (session) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {},
+  };
 }
