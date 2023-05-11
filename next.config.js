@@ -2,7 +2,11 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["replicate.com", "replicate.delivery"],
+    domains: [
+      "replicate.com",
+      "replicate.delivery",
+      "sketch-ai.s3.us-east-1.amazonaws.com",
+    ],
   },
 };
 

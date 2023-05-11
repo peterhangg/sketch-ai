@@ -3,30 +3,34 @@ import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { motion } from "framer-motion";
-import { useDrawStore } from "@/state/store";
-import { promptSchema } from "@/lib/validations";
-import { blobUrlToDataURL } from "@/lib/utils";
-import { ErrorMessage } from "./ui/ErrorMessage";
 import { Input } from "./ui/Input";
 import { Button } from "./ui/Button";
+import { displayToast, ToastVariant } from "./ui/Toast";
+import { useDrawStore } from "@/state/drawStore";
+import useColorPickerStore from "@/state/colorPickerStore";
+import { promptSchema } from "@/lib/validations";
+import { blobUrlToDataURL } from "@/lib/blob";
+import { ErrorMessage } from "./ui/ErrorMessage";
+import { SOMETHING_WENT_WRONG } from "@/lib/constants";
 
 type FormData = z.infer<typeof promptSchema>;
 
 export function PromptForm() {
-  const store = useDrawStore((state) => state);
   const {
     sketch,
     setGeneratedImage,
     loading,
     setLoading,
-    setError,
+    setGenerateError,
     setSubmitted,
     setPrompt,
-  } = store;
+  } = useDrawStore((state) => state);
+  const { onClose } = useColorPickerStore((state) => state);
 
   const {
     handleSubmit,
     register,
+    watch,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(promptSchema),
@@ -34,13 +38,16 @@ export function PromptForm() {
       prompt: "",
     },
   });
+  const promptValue = watch("prompt");
 
   const generatePhoto = async (
     imageUrl: string,
     prompt: string
   ): Promise<void> => {
     try {
+      setGenerateError("");
       const sketchDataUrl = await blobUrlToDataURL(imageUrl);
+
       const response = await fetch("/api/prediction", {
         method: "POST",
         headers: {
@@ -52,13 +59,14 @@ export function PromptForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data);
+        setGenerateError(data?.message || SOMETHING_WENT_WRONG);
+        displayToast(data?.message || SOMETHING_WENT_WRONG, ToastVariant.ERROR);
         return;
       }
 
       setGeneratedImage(data);
-    } catch (reason) {
-      setError({ message: "unexpected error try again" });
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -95,8 +103,13 @@ export function PromptForm() {
           className="rounded-r-none"
           placeholder="Describe the image you want to create..."
           {...register("prompt")}
+          onClick={onClose}
         />
-        <Button className="rounded-l-none" size="lg" disabled={loading}>
+        <Button
+          className="rounded-l-none"
+          size="lg"
+          disabled={loading || !promptValue}
+        >
           Submit
         </Button>
       </motion.div>

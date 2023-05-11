@@ -3,11 +3,12 @@ import { cva, VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 export const buttonStyles = cva(
-  "inline-flex items-center justify-center font-bold disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center font-bold disabled:pointer-events-none disabled:opacity-50 transition duration-500",
   {
     variants: {
       variant: {
-        default: "bg-slate-900 text-white hover:bg-slate-700",
+        default: "bg-slate-900 text-white hover:bg-slate-600",
+        light: "bg-white border text-black hover:bg-slate-900 hover:text-white",
       },
       size: {
         default: "h-11 px-4 py-3 rounded-md",
@@ -22,7 +23,7 @@ export const buttonStyles = cva(
   }
 );
 
-export interface ButtonProps
+interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonStyles> {}
 

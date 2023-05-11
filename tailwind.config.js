@@ -9,7 +9,18 @@ module.exports = {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      keyframes: {
+        "fade-in-left": {
+          from: { opacity: 0, transform: "translateX(10px)" },
+          to: { opacity: 1, transform: "none" },
+        },
+      },
+      animation: {
+        "fade-in-left":
+          "fade-in-left 600ms var(--animation-delay, 0ms) cubic-bezier(.21,1.02,.73,1) forwards",
+      },
+    },
   },
   plugins: [],
 };

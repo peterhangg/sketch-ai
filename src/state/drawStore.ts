@@ -3,26 +3,35 @@ import { create } from "zustand";
 interface IDrawStore {
   prompt: string;
   sketch: string;
+  sketchBlob: Blob | null;
   generatedImage: string;
   submitted: boolean;
   loading: boolean;
-  error: { message: string } | null;
+  generateError: string | null;
+  srcFromGallary: boolean;
+  saved: boolean;
   setPrompt: (promptMsg: string) => void;
   setSketch: (imageUrl: string) => void;
+  setSketchBlob: (imageUrl: Blob) => void;
   setGeneratedImage: (imageUrl: string) => void;
-  setLoading: (payload: boolean) => void;
-  setError: (payload: { message: string }) => void;
+  setLoading: (loadingState: boolean) => void;
   setSubmitted: (submittedState: boolean) => void;
+  setGenerateError: (errorMessage: string) => void;
+  setSaved: (savedState: boolean) => void;
+  setSrcFromGallary: (srcState: boolean) => void;
   reset: () => void;
 }
 
 const initialState = {
   prompt: "",
   sketch: "",
+  sketchBlob: null,
   generatedImage: "",
   submitted: false,
   loading: false,
-  error: null,
+  generateError: null,
+  srcFromGallary: false,
+  saved: false,
 };
 
 export const useDrawStore = create<IDrawStore>(
@@ -38,6 +47,12 @@ export const useDrawStore = create<IDrawStore>(
       return set((state) => ({
         ...state,
         sketch: imageUrl,
+      }));
+    },
+    setSketchBlob: (sketch: Blob) => {
+      return set((state) => ({
+        ...state,
+        sketchBlob: sketch,
       }));
     },
     setGeneratedImage: (imageUrl: string) => {
@@ -58,18 +73,27 @@ export const useDrawStore = create<IDrawStore>(
         loading: loadingState,
       }));
     },
-    setError: (error: { message: string }) => {
+    setGenerateError: (errorMessage: string) => {
       return set((state) => ({
         ...state,
-        error,
+        generateError: errorMessage,
+      }));
+    },
+    setSaved: (savedState: boolean) => {
+      return set((state) => ({
+        ...state,
+        saved: savedState,
+      }));
+    },
+    setSrcFromGallary: (srcState: boolean) => {
+      return set((state) => ({
+        ...state,
+        srcFromGallary: srcState,
       }));
     },
     reset: () => {
-      return set((state) => ({
-        ...state,
-        submitted: false,
-        generatedImage: "",
-        sketch: "",
+      return set(() => ({
+        ...initialState,
       }));
     },
   })

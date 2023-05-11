@@ -2,7 +2,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 
 interface IconButtonProps {
-  icon: JSX.Element;
+  icon: React.ReactNode;
   className?: string;
   onClick?: () => void;
   disabled?: boolean;

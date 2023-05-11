@@ -1,17 +1,17 @@
 import { NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import GoogleProvider from "next-auth/providers/google";
+import DiscordProvider from "next-auth/providers/discord";
 import { getServerSession } from "next-auth";
 import { prisma } from "./prisma";
 import { GetServerSessionContext } from "./types/nextauth";
+import { config } from "../../config";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
+    GoogleProvider(config.auth.google),
+    DiscordProvider(config.auth.discord),
   ],
   session: {
     strategy: "jwt",
@@ -22,12 +22,12 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       const existingUser = await prisma.user.findFirst({
-        where: { email: token.email! },
+        where: { email: token.email },
       });
 
       if (!existingUser) {
         if (user) {
-          token.id = user!.id;
+          token.id = user.id;
         }
         return token;
       }

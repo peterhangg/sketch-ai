@@ -13,3 +13,9 @@ export type Draw = {
 export type User = DefaultSession["user"] & {
   id: string;
 };
+
+export enum ImageFileExtension {
+  PNG = ".png",
+  JPG = ".jpg",
+  JPEG = ".jpeg",
+}

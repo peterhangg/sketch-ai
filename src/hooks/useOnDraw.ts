@@ -1,6 +1,7 @@
 import React from "react";
-import { Point, Draw } from "@/lib/types";
-import { ROUND, BLACK } from "@/lib/constants";
+import { Point } from "@/lib/types";
+import { BLACK } from "@/lib/constants";
+import { draw, isCanvasEmpty } from "@/lib/draw";
 
 export const useOnDraw = () => {
   const [undoHistory, setUndoHistory] = React.useState<ImageData[]>([]);
@@ -10,30 +11,6 @@ export const useOnDraw = () => {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const prevPoint = React.useRef<Point | null>(null);
   const mouseDownRef = React.useRef<boolean>(false);
-
-  const draw = React.useCallback(
-    ({ ctx, currPoint, prevPoint, color, width = 5 }: Draw) => {
-      if (!ctx) return;
-      const { x: currX, y: currY } = currPoint;
-      let startingPoint = prevPoint ?? currPoint;
-
-      ctx.beginPath();
-      ctx.lineWidth = width;
-      ctx.strokeStyle = color ?? BLACK;
-      ctx.lineCap = ROUND;
-      ctx.lineJoin = ROUND;
-      ctx.moveTo(startingPoint.x, startingPoint.y);
-      ctx.lineTo(currX, currY);
-      ctx.stroke();
-
-      // Fill pixelated line
-      ctx.fillStyle = color ?? BLACK;
-      ctx.beginPath();
-      ctx.arc(startingPoint.x, startingPoint.y, 2, 0, 2 * Math.PI);
-      ctx.fill();
-    },
-    []
-  );
 
   const onMouseDown = React.useCallback(() => {
     mouseDownRef.current = true;
@@ -49,25 +26,12 @@ export const useOnDraw = () => {
     setRedoHistory([]);
   }, []);
 
-  const isCanvasEmpty = React.useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return true;
-
-    const context = canvas.getContext("2d", { willReadFrequently: true });
-    if (!context) return true;
-
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-
-    for (let i = 0; i < imageData.data.length; i++) {
-      // Check if pixel completely transparency
-      if (imageData.data[i] !== 0) return false;
-    }
-    return true;
-  }, []);
-
   const clear = React.useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
+    const validateEmptyCanvas = isCanvasEmpty(canvas);
+    if (validateEmptyCanvas) return;
 
     const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
@@ -131,13 +95,13 @@ export const useOnDraw = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const handler = (event: MouseEvent) => {
+    const handler = (event: MouseEvent): void => {
       if (!mouseDownRef.current) return;
-      const currPoint = computePointInCanvas(event);
 
       const canvas = canvasRef.current;
       if (!canvas) return;
 
+      const currPoint = computePointOnCanvas(event);
       const ctx = canvas.getContext("2d", { willReadFrequently: true });
       if (!ctx || !currPoint) return;
 
@@ -151,7 +115,7 @@ export const useOnDraw = () => {
       prevPoint.current = currPoint;
     };
 
-    const computePointInCanvas = (event: MouseEvent) => {
+    const computePointOnCanvas = (event: MouseEvent): Point | undefined => {
       const canvas = canvasRef.current;
       if (!canvas) return;
 
@@ -162,12 +126,12 @@ export const useOnDraw = () => {
       return { x, y };
     };
 
-    const mouseUpHandler = () => {
+    const mouseUpHandler = (): void => {
       mouseDownRef.current = false;
       prevPoint.current = null;
     };
 
-    const handleKeyPress = (event: KeyboardEvent) => {
+    const handleKeyPress = (event: KeyboardEvent): void => {
       if (event.key === "z" && event.ctrlKey) {
         undo();
       }
@@ -185,7 +149,7 @@ export const useOnDraw = () => {
       window.removeEventListener("mouseup", mouseUpHandler);
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, [color, draw, undo, redo]);
+  }, [color, undo, redo]);
 
   return {
     canvasRef,
@@ -197,6 +161,5 @@ export const useOnDraw = () => {
     color,
     undoHistory,
     redoHistory,
-    isCanvasEmpty,
   };
 };

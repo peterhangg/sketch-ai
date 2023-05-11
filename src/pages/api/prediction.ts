@@ -1,12 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import {
-  API_KEY,
-  REPLICATE_API_BASE_URL,
-  FAILED,
-  MODEL_VERSION,
-  SUCCEEDED,
-} from "@/lib/constants";
+import { FAILED, SUCCEEDED } from "@/lib/constants";
 import { generateSchema } from "@/lib/validations";
+import { config } from "../../../config";
 
 interface ReplicateApiRequest extends NextApiRequest {
   body: {
@@ -55,7 +50,7 @@ async function getGeneratedImage(responseUrl: string): Promise<string[]> {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Token ${API_KEY}`,
+        Authorization: `Token ${config.replicate.apiKey}`,
       },
     });
     const data = await response.json();
@@ -76,7 +71,7 @@ export default async function handler(
   req: ReplicateApiRequest,
   res: NextApiResponse
 ) {
-  if (!API_KEY) {
+  if (!config.replicate.apiKey) {
     throw new Error("The REPLICATE_API_KEY environment variable is not set");
   }
 
@@ -94,17 +89,20 @@ export default async function handler(
 
   if (req.method === "POST") {
     try {
-      const response = await fetch(`${REPLICATE_API_BASE_URL}/v1/predictions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Token ${API_KEY}`,
-        },
-        body: JSON.stringify({
-          version: MODEL_VERSION,
-          input: { image: imageUrl, prompt },
-        }),
-      });
+      const response = await fetch(
+        `${config.replicate.apiBaseUrl}/v1/predictions`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${config.replicate.apiKey}`,
+          },
+          body: JSON.stringify({
+            version: config.replicate.modelVersion,
+            input: { image: imageUrl, prompt },
+          }),
+        }
+      );
 
       const data = await response.json();
       const generatedImages = await getGeneratedImage(data?.urls?.get);
@@ -116,7 +114,7 @@ export default async function handler(
         return res.status(400).json({ message: error.message });
       }
       return res
-        .status(404)
+        .status(500)
         .json({ message: "Something went wrong during the request" });
     }
   }
