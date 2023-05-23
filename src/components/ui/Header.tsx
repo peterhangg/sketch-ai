@@ -26,13 +26,13 @@ export function Header() {
         {session ? (
           <div>
             <Link
-              href="/gallary"
+              href="/gallery"
               className={cn(
                 buttonStyles({ variant: "light", size: "lg" }),
                 "mr-3"
               )}
             >
-              Gallary
+              Gallery
             </Link>
             <button
               className={cn(buttonStyles({ size: "lg" }))}

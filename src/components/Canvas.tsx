@@ -21,8 +21,8 @@ export function Canvas() {
     sketch,
     setSketch,
     setSketchBlob,
-    srcFromGallary,
-    setSrcFromGallary,
+    srcFromGallery,
+    setSrcFromGallery,
     setSaved,
   } = useDrawStore((state) => state);
 
@@ -54,7 +54,7 @@ export function Canvas() {
       setSketchBlob(blob);
     };
 
-    if (sketch && srcFromGallary) {
+    if (sketch && srcFromGallery) {
       const image = new Image();
       image.crossOrigin = "anonymous";
       image.src = sketch;
@@ -63,14 +63,14 @@ export function Canvas() {
         context.drawImage(image, 0, 0, canvas.width, canvas.height);
         setBlobFromSrc();
       };
-      setSrcFromGallary(false);
+      setSrcFromGallery(false);
       setSaved(true);
     }
   }, [
     canvasRef,
     sketch,
-    srcFromGallary,
-    setSrcFromGallary,
+    srcFromGallery,
+    setSrcFromGallery,
     setSketchBlob,
     setSaved,
   ]);

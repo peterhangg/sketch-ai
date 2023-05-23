@@ -29,6 +29,18 @@ export default async function handler(
 
   if (req.method == "POST") {
     try {
+      const userSketchCount = await prisma.sketch.count({
+        where: {
+          userId,
+        },
+      });
+
+      if (userSketchCount >= 18) {
+        throw new Error(
+          "Exceeded the maximum number of saved sketches (18). You can delete old sketches."
+        );
+      }
+
       const { fields } = await parseForm(req);
       const { sketchData } = uploadSchema.parse(fields);
       const sketchBuffer = Buffer.from(sketchData as string, "base64");
@@ -69,7 +81,7 @@ export default async function handler(
         res.status(400).json({ message: error.message });
       }
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: error.issues });
+        return res.status(400).json({ message: error.message });
       }
       if (error instanceof PrismaClientUnknownRequestError) {
         return res.status(400).json({ message: error.message });
@@ -110,7 +122,7 @@ export default async function handler(
       return res.status(200).json({ message: "Sketch was deleted" });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: error.issues });
+        return res.status(400).json({ message: error.message });
       }
       if (error instanceof PrismaClientUnknownRequestError) {
         return res.status(400).json({ message: error.message });

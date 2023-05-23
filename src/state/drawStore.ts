@@ -8,7 +8,7 @@ interface IDrawStore {
   submitted: boolean;
   loading: boolean;
   generateError: string | null;
-  srcFromGallary: boolean;
+  srcFromGallery: boolean;
   saved: boolean;
   setPrompt: (promptMsg: string) => void;
   setSketch: (imageUrl: string) => void;
@@ -18,7 +18,7 @@ interface IDrawStore {
   setSubmitted: (submittedState: boolean) => void;
   setGenerateError: (errorMessage: string) => void;
   setSaved: (savedState: boolean) => void;
-  setSrcFromGallary: (srcState: boolean) => void;
+  setSrcFromGallery: (srcState: boolean) => void;
   reset: () => void;
 }
 
@@ -30,7 +30,7 @@ const initialState = {
   submitted: false,
   loading: false,
   generateError: null,
-  srcFromGallary: false,
+  srcFromGallery: false,
   saved: false,
 };
 
@@ -85,10 +85,10 @@ export const useDrawStore = create<IDrawStore>(
         saved: savedState,
       }));
     },
-    setSrcFromGallary: (srcState: boolean) => {
+    setSrcFromGallery: (srcState: boolean) => {
       return set((state) => ({
         ...state,
-        srcFromGallary: srcState,
+        srcFromGallery: srcState,
       }));
     },
     reset: () => {
