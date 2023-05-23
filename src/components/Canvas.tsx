@@ -5,17 +5,26 @@ import {
   TrashIcon,
   ArrowDownTrayIcon,
 } from "@heroicons/react/24/solid";
-import { CanvasButton } from "./CanvasButton";
+import { IconButton } from "./IconButton";
 import { ColorPicker } from "./ColorPicker";
 import { useOnDraw } from "@/hooks/useOnDraw";
-import { useDrawStore } from "@/state/store";
+import { useDrawStore } from "@/state/drawStore";
+import useColorPickerStore from "@/state/colorPickerStore";
+import { createBlob, createDownload } from "@/lib/blob";
+import { WHITE } from "@/lib/constants";
 
 const MAX_WIDTH = 800;
 const MAX_HEIGHT = 800;
 
 export function Canvas() {
-  const store = useDrawStore((state) => state);
-  const { setSketch } = store;
+  const {
+    sketch,
+    setSketch,
+    setSketchBlob,
+    srcFromGallery,
+    setSrcFromGallery,
+    setSaved,
+  } = useDrawStore((state) => state);
 
   const {
     canvasRef,
@@ -27,40 +36,87 @@ export function Canvas() {
     setColor,
     undoHistory,
     redoHistory,
-    isCanvasEmpty,
   } = useOnDraw();
 
-  const downloadHandler = (
-    chartRef: React.MutableRefObject<HTMLCanvasElement | null>
-  ) => {
-    if (!chartRef.current) return;
+  const colorPickerStore = useColorPickerStore((state) => state);
+  const { onClose } = colorPickerStore;
 
-    const newCanvas = document.createElement("canvas");
-    newCanvas.width = chartRef.current.width;
-    newCanvas.height = chartRef.current.height;
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    const ctx = newCanvas.getContext("2d", { willReadFrequently: true });
-    if (!ctx) return;
+    const context = canvas.getContext("2d");
+    if (!context) return;
 
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
-    // Draw the original canvas on the new canvas
-    ctx.drawImage(chartRef.current, 0, 0);
+    const setBlobFromSrc = async () => {
+      const blob = await createBlob(canvas);
+      if (!blob) return;
+      setSketchBlob(blob);
+    };
 
-    const downloadLink = document.createElement("a");
-    downloadLink.setAttribute("download", "sketch.png");
+    if (sketch && srcFromGallery) {
+      const image = new Image();
+      image.crossOrigin = "anonymous";
+      image.src = sketch;
 
-    const imageUrl = newCanvas.toDataURL("image/png");
-    setSketch(imageUrl);
-    downloadLink.setAttribute("href", imageUrl);
-    downloadLink.click();
-  };
+      image.onload = () => {
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        setBlobFromSrc();
+      };
+      setSrcFromGallery(false);
+      setSaved(true);
+    }
+  }, [
+    canvasRef,
+    sketch,
+    srcFromGallery,
+    setSrcFromGallery,
+    setSketchBlob,
+    setSaved,
+  ]);
 
-  const handleCanvasChange = async () => {
+  const handleMouseDown = React.useCallback(() => {
+    onClose();
+    onMouseDown();
+  }, [onClose, onMouseDown]);
+
+  const downloadHandler = React.useCallback(
+    async (chartRef: React.MutableRefObject<HTMLCanvasElement | null>) => {
+      if (!chartRef.current) return;
+
+      const newCanvas = document.createElement("canvas");
+      newCanvas.width = chartRef.current.width;
+      newCanvas.height = chartRef.current.height;
+
+      const ctx = newCanvas.getContext("2d", { willReadFrequently: true });
+      if (!ctx) return;
+
+      ctx.fillStyle = WHITE;
+      ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
+      // Draw the original canvas on the new canvas
+      ctx.drawImage(chartRef.current, 0, 0);
+
+      const blob = await createBlob(newCanvas);
+      if (!blob) return;
+
+      const blobUrl = URL.createObjectURL(blob);
+      createDownload(blobUrl);
+      URL.revokeObjectURL(blobUrl);
+    },
+    []
+  );
+
+  const handleCanvasChange = React.useCallback(async () => {
     if (!canvasRef.current) return;
-    const imageUrl = await canvasRef.current.toDataURL("image/png");
-    setSketch(imageUrl);
-  };
+
+    const blob = await createBlob(canvasRef.current);
+    if (!blob) return;
+    setSketchBlob(blob);
+
+    const blobUrl = URL.createObjectURL(blob);
+    setSketch(blobUrl);
+    setSaved(false);
+  }, [canvasRef, setSketch, setSketchBlob, setSaved]);
 
   const [canvasSize, setCanvasSize] = React.useState({
     width: MAX_WIDTH,
@@ -102,20 +158,20 @@ export function Canvas() {
           width={canvasSize.width}
           height={canvasSize.height}
           ref={canvasRef}
-          onMouseDown={onMouseDown}
+          onMouseDown={handleMouseDown}
           onMouseUp={handleCanvasChange}
         />
       </div>
       <div className="flex w-full items-center justify-between px-2 pb-2">
         <ColorPicker setColor={setColor} color={color} />
         <div>
-          <CanvasButton
+          <IconButton
             className="mx-2"
             icon={<ArrowUturnLeftIcon />}
             onClick={undo}
             disabled={!undoHistory.length}
           />
-          <CanvasButton
+          <IconButton
             icon={<ArrowUturnRightIcon />}
             onClick={redo}
             disabled={
@@ -123,13 +179,13 @@ export function Canvas() {
               !redoHistory.length
             }
           />
-          <CanvasButton
+          <IconButton
             className="mx-2"
             icon={<TrashIcon />}
             onClick={clear}
-            disabled={isCanvasEmpty() || !undoHistory.length}
+            disabled={!undoHistory.length}
           />
-          <CanvasButton
+          <IconButton
             icon={<ArrowDownTrayIcon />}
             onClick={() => downloadHandler(canvasRef)}
           />

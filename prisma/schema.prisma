@@ -7,7 +7,6 @@ generator client {
   provider        = "prisma-client-js"
 }
 
-// Necessary for Next auth
 model Account {
   id                 String  @id @default(cuid())
   userId             String
@@ -21,7 +20,6 @@ model Account {
   scope              String?
   id_token           String?  @db.Text
   session_state      String?
-
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
@@ -43,6 +41,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  sketches      Sketch[]
 }
 
 model VerificationToken {
@@ -51,4 +50,12 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Sketch {
+  id         String @id @default(cuid())
+  userId     String
+  url        String
+  createdAt  DateTime @default(now())
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

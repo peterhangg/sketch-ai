@@ -20,18 +20,29 @@ export function Header() {
       }}
     >
       <nav className="flex w-full items-center justify-between border-b border-b-slate-500 py-4">
-        <Link className="text-lg" href="/">
+        <Link className="text-2xl font-semibold tracking-tighter" href="/">
           Sketch AI
         </Link>
         {session ? (
-          <button
-            className={cn(buttonStyles({ size: "lg" }))}
-            onClick={() => {
-              signOut();
-            }}
-          >
-            Sign Out
-          </button>
+          <div>
+            <Link
+              href="/gallery"
+              className={cn(
+                buttonStyles({ variant: "light", size: "lg" }),
+                "mr-3"
+              )}
+            >
+              Gallery
+            </Link>
+            <button
+              className={cn(buttonStyles({ size: "lg" }))}
+              onClick={() => {
+                signOut();
+              }}
+            >
+              Sign Out
+            </button>
+          </div>
         ) : (
           <Link href="/auth/login" className={cn(buttonStyles({ size: "lg" }))}>
             Login

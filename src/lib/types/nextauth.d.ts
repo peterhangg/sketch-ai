@@ -1,11 +1,15 @@
 import type { DefaultSession } from "next-auth";
+import type {
+  GetServerSidePropsContext,
+  NextApiRequest,
+  NextApiResponse,
+} from "next";
 import { JWT } from "next-auth/jwt";
+import { User } from ".";
 
 declare module "next-auth" {
   interface Session {
-    user: DefaultSession["user"] & {
-      id: string;
-    };
+    user: User;
   }
 }
 
@@ -14,3 +18,10 @@ declare module "next-auth/jwt" {
     id: string;
   }
 }
+
+type GetServerSessionContext =
+  | {
+      req: GetServerSidePropsContext["req"];
+      res: GetServerSidePropsContext["res"];
+    }
+  | { req: NextApiRequest; res: NextApiResponse };

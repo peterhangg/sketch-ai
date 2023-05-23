@@ -1,18 +1,14 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
-interface CanvasButtonProps {
-  icon: JSX.Element;
+interface IconButtonProps {
+  icon: React.ReactNode;
   className?: string;
   onClick?: () => void;
   disabled?: boolean;
 }
 
-export const CanvasButton = ({
-  icon,
-  className,
-  ...props
-}: CanvasButtonProps) => {
+export const IconButton = ({ icon, className, ...props }: IconButtonProps) => {
   return (
     <button
       className={cn(
