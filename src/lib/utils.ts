@@ -13,3 +13,34 @@ export function isValidUrl(url: string): boolean {
     return false;
   }
 }
+
+export const sleep = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
+export async function pollUntilDone<T>(
+  fn: () => Promise<T>,
+  intervalMs = 1000,
+  timeoutMs = 30000
+): Promise<T> {
+  const start = Date.now();
+
+  while (true) {
+    try {
+      const result = await fn();
+      return result;
+    } catch (error) {
+      if (Date.now() - start > timeoutMs) {
+        if (error instanceof Error) {
+          throw new Error(
+            `Function timed out after ${timeoutMs} ms: ${error.message}`
+          );
+        } else {
+          throw new Error(
+            `Function timed out after ${timeoutMs} ms: Unknown error occurred`
+          );
+        }
+      }
+    }
+    await sleep(intervalMs);
+  }
+}
