@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { FAILED, SUCCEEDED } from "@/lib/constants";
 import { generateSchema } from "@/lib/validations";
+import { pollUntilDone, sleep } from "@/lib/utils";
+import Ratelimiter from "@/lib/rate-limit";
 import { config } from "../../../config";
 
 interface ReplicateApiRequest extends NextApiRequest {
@@ -8,36 +10,6 @@ interface ReplicateApiRequest extends NextApiRequest {
     imageUrl: string;
     prompt: string;
   };
-}
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-async function pollUntilDone<T>(
-  fn: () => Promise<T>,
-  intervalMs = 1000,
-  timeoutMs = 30000
-): Promise<T> {
-  const start = Date.now();
-
-  while (true) {
-    try {
-      const result = await fn();
-      return result;
-    } catch (error) {
-      if (Date.now() - start > timeoutMs) {
-        if (error instanceof Error) {
-          throw new Error(
-            `Function timed out after ${timeoutMs} ms: ${error.message}`
-          );
-        } else {
-          throw new Error(
-            `Function timed out after ${timeoutMs} ms: Unknown error occurred`
-          );
-        }
-      }
-    }
-    await sleep(intervalMs);
-  }
 }
 
 async function getGeneratedImage(responseUrl: string): Promise<string[]> {
@@ -67,6 +39,8 @@ async function getGeneratedImage(responseUrl: string): Promise<string[]> {
   return generatedImage;
 }
 
+const ratelimiter = new Ratelimiter();
+
 export default async function handler(
   req: ReplicateApiRequest,
   res: NextApiResponse
@@ -75,8 +49,12 @@ export default async function handler(
     throw new Error("The REPLICATE_API_KEY environment variable is not set");
   }
 
-  const { imageUrl, prompt } = generateSchema.parse(req.body);
+  const { success, message } = await ratelimiter.validate(req, res);
+  if (!success) {
+    return res.status(429).json({ message });
+  }
 
+  const { imageUrl, prompt } = generateSchema.parse(req.body);
   if (!imageUrl) {
     return res.status(400).json({ message: "Please provide an image URL" });
   }

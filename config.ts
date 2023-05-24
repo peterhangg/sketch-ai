@@ -30,4 +30,10 @@ export const config = {
     },
     defaultFolder: process.env.S3_DEFAULT_FOLDER || "sketches",
   },
+  upstash: {
+    redis: {
+      url: process.env.UPSTASH_REDIS_REST_URL!,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+    },
+  },
 };
