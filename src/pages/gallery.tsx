@@ -3,14 +3,10 @@ import { GetServerSidePropsContext } from "next";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { AnimatePresence, motion } from "framer-motion";
-import { Toaster } from "react-hot-toast";
 import { getServerAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isValidUrl } from "@/lib/utils";
 import { Sketch, User } from "@prisma/client";
-import { Container } from "@/components/ui/Container";
-import { Header } from "@/components/ui/Header";
-import { Footer } from "@/components/ui/Footer";
 import { Spinner } from "@/components/ui/Spinner";
 import { IconButton } from "@/components/IconButton";
 import { TrashIcon, PencilIcon } from "@heroicons/react/24/solid";
@@ -118,12 +114,11 @@ export default function GalleryPage({
   );
 
   return (
-    <Container className="items-center">
-      <Header />
+    <div className="flex flex-col items-center justify-center">
       <h1 className="mt-4 text-2xl font-semibold tracking-tighter">
         Sketch Gallery
       </h1>
-      <main className="container my-2 grid flex-1 grid-cols-1 gap-3 p-2 md:grid-cols-2 lg:grid-cols-3">
+      <div className="container my-2 grid flex-1 grid-cols-1 gap-3 p-2 md:grid-cols-2 lg:grid-cols-3">
         <AnimatePresence>
           {sketchList.map((sketch) => (
             <motion.div
@@ -161,11 +156,9 @@ export default function GalleryPage({
             </motion.div>
           ))}
         </AnimatePresence>
-        <Toaster />
         <div ref={intersectionRef}></div>
-      </main>
-      <Footer />
-    </Container>
+      </div>
+    </div>
   );
 }
 

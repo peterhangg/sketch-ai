@@ -119,13 +119,13 @@ export function Canvas() {
     <div>
       <canvas
         className="h-full w-full rounded-md border border-black"
-        width={800}
-        height={900}
+        width={700}
+        height={800}
         ref={canvasRef}
         onMouseDown={handleMouseDown}
         onMouseUp={handleCanvasChange}
       />
-      <div className="flex flex-1 items-center justify-between px-2 pb-2">
+      <div className="flex flex-1 items-center justify-between pb-2">
         <ColorPicker setColor={setColor} color={color} />
         <div>
           <IconButton
