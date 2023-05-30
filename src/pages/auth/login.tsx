@@ -17,7 +17,7 @@ export default function LoginPage() {
   return (
     <Container className="items-center justify-center">
       <motion.div
-        className="absolute left-8 top-8"
+        className="absolute left-2 top-2 md:left-8 md:top-8"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.5 }}
