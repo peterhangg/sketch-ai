@@ -13,9 +13,6 @@ import useColorPickerStore from "@/state/colorPickerStore";
 import { createBlob, createDownload } from "@/lib/blob";
 import { WHITE } from "@/lib/constants";
 
-const MAX_WIDTH = 800;
-const MAX_HEIGHT = 800;
-
 export function Canvas() {
   const {
     sketch,
@@ -118,51 +115,17 @@ export function Canvas() {
     setSaved(false);
   }, [canvasRef, setSketch, setSketchBlob, setSaved]);
 
-  const [canvasSize, setCanvasSize] = React.useState({
-    width: MAX_WIDTH,
-    height: MAX_HEIGHT,
-  });
-
-  React.useEffect(() => {
-    const handleResize = () => {
-      const canvas = canvasRef.current;
-      if (canvas) {
-        const canvasParent = canvas.parentElement;
-
-        if (canvasParent) {
-          const { width, height } = canvasParent.getBoundingClientRect();
-          const resizeHeight = height > MAX_HEIGHT ? MAX_HEIGHT : height;
-          const resizeWidth = width > MAX_WIDTH ? MAX_WIDTH : width;
-
-          canvas.width = resizeWidth;
-          canvas.height = resizeHeight;
-          setCanvasSize({
-            width: resizeWidth,
-            height: resizeHeight,
-          });
-        }
-      }
-    };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-
-    return () => window.removeEventListener("resize", handleResize);
-  }, [canvasRef]);
-
   return (
-    <div className="flex max-w-[700px] flex-col items-center">
-      <div className="flex w-full items-center justify-center p-2">
-        <canvas
-          className="rounded-md border border-black"
-          width={canvasSize.width}
-          height={canvasSize.height}
-          ref={canvasRef}
-          onMouseDown={handleMouseDown}
-          onMouseUp={handleCanvasChange}
-        />
-      </div>
-      <div className="flex w-full items-center justify-between px-2 pb-2">
+    <div>
+      <canvas
+        className="h-full w-full rounded-md border border-black"
+        width={700}
+        height={800}
+        ref={canvasRef}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleCanvasChange}
+      />
+      <div className="flex flex-1 items-center justify-between pb-2">
         <ColorPicker setColor={setColor} color={color} />
         <div>
           <IconButton

@@ -86,9 +86,12 @@ export function PromptForm() {
   };
 
   return (
-    <form className="my-3 flex flex-col p-2" onSubmit={handleSubmit(onSubmit)}>
+    <form
+      className="my-3 flex w-full flex-col p-2"
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <motion.div
-        className="flex flex-1"
+        className="flex w-full"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.5 }}
@@ -105,11 +108,7 @@ export function PromptForm() {
           {...register("prompt")}
           onClick={onClose}
         />
-        <Button
-          className="rounded-l-none"
-          size="lg"
-          disabled={loading || !promptValue}
-        >
+        <Button className="rounded-l-none" disabled={loading || !promptValue}>
           Submit
         </Button>
       </motion.div>

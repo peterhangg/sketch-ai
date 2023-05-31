@@ -16,6 +16,7 @@ export function isCanvasEmpty(canvas: HTMLCanvasElement) {
 
 export function draw({ ctx, currPoint, prevPoint, color, width = 5 }: Draw) {
   if (!ctx) return;
+
   const { x: currX, y: currY } = currPoint;
   let startingPoint = prevPoint ?? currPoint;
 
