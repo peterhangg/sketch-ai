@@ -27,15 +27,12 @@ export function Header() {
           <div>
             <Link
               href="/gallery"
-              className={cn(
-                buttonStyles({ variant: "light", size: "lg" }),
-                "mr-3"
-              )}
+              className={cn(buttonStyles({ variant: "light" }), "mr-2")}
             >
               Gallery
             </Link>
             <button
-              className={cn(buttonStyles({ size: "lg" }))}
+              className={cn(buttonStyles({}))}
               onClick={() => {
                 signOut();
               }}
@@ -44,7 +41,7 @@ export function Header() {
             </button>
           </div>
         ) : (
-          <Link href="/auth/login" className={cn(buttonStyles({ size: "lg" }))}>
+          <Link href="/auth/login" className={cn(buttonStyles({}))}>
             Login
           </Link>
         )}

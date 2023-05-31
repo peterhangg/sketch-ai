@@ -108,11 +108,7 @@ export function PromptForm() {
           {...register("prompt")}
           onClick={onClose}
         />
-        <Button
-          className="rounded-l-none"
-          size="lg"
-          disabled={loading || !promptValue}
-        >
+        <Button className="rounded-l-none" disabled={loading || !promptValue}>
           Submit
         </Button>
       </motion.div>
