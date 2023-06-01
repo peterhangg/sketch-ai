@@ -1,8 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { FAILED, SUCCEEDED } from "@/lib/constants";
 import { generateSchema } from "@/lib/validations";
-import { pollUntilDone, sleep } from "@/lib/utils";
-import Ratelimiter from "@/lib/rate-limit";
+import { pollUntilDone } from "@/lib/utils";
 import { config } from "../../../config";
 
 interface ReplicateApiRequest extends NextApiRequest {
@@ -39,8 +38,6 @@ async function getGeneratedImage(responseUrl: string): Promise<string[]> {
   return generatedImage;
 }
 
-const ratelimiter = new Ratelimiter();
-
 export default async function handler(
   req: ReplicateApiRequest,
   res: NextApiResponse
@@ -49,12 +46,8 @@ export default async function handler(
     throw new Error("The REPLICATE_API_KEY environment variable is not set");
   }
 
-  const { success, message } = await ratelimiter.validate(req, res);
-  if (!success) {
-    return res.status(429).json({ message });
-  }
-
   const { imageUrl, prompt } = generateSchema.parse(req.body);
+
   if (!imageUrl) {
     return res.status(400).json({ message: "Please provide an image URL" });
   }

@@ -1,5 +1,6 @@
 import React from "react";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import { Toaster } from "react-hot-toast";
 import { Header } from "../ui/Header";
 import { Footer } from "../ui/Footer";
@@ -9,6 +10,8 @@ interface LayoutProps {
 }
 
 export function Layout({ children }: LayoutProps) {
+  const router = useRouter();
+
   return (
     <>
       <Head>
@@ -21,7 +24,7 @@ export function Layout({ children }: LayoutProps) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex h-screen min-h-screen w-screen flex-col">
-        <Header />
+        {router.pathname !== "/auth/login" && <Header />}
         <main className="flex-1 p-4 antialiased">{children}</main>
         <Toaster />
         <Footer />

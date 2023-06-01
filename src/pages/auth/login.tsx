@@ -5,7 +5,6 @@ import { GetServerSidePropsContext } from "next";
 import { signIn } from "next-auth/react";
 import { motion } from "framer-motion";
 import { ChevronLeftIcon } from "@heroicons/react/24/solid";
-import { Container } from "@/components/ui/Container";
 import { buttonStyles } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { DISCORD, GOOGLE } from "@/lib/constants";
@@ -15,7 +14,7 @@ import DiscordIcon from "../../../public/discord.svg";
 
 export default function LoginPage() {
   return (
-    <Container className="items-center justify-center">
+    <div className="flex h-full items-center justify-center">
       <motion.div
         className="absolute left-2 top-2 md:left-8 md:top-8"
         initial="hidden"
@@ -41,7 +40,7 @@ export default function LoginPage() {
         </Link>
       </motion.div>
       <motion.div
-        className="container flex h-full flex-col items-center justify-center"
+        className="flex flex-col items-center justify-center"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.5 }}
@@ -86,7 +85,7 @@ export default function LoginPage() {
           <span>Sign in with Discord</span>
         </button>
       </motion.div>
-    </Container>
+    </div>
   );
 }
 

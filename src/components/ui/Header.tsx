@@ -31,12 +31,7 @@ export function Header() {
             >
               Gallery
             </Link>
-            <button
-              className={cn(buttonStyles({}))}
-              onClick={() => {
-                signOut();
-              }}
-            >
+            <button className={cn(buttonStyles({}))} onClick={() => signOut()}>
               Sign Out
             </button>
           </div>
