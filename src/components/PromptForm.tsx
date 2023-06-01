@@ -72,12 +72,29 @@ export function PromptForm() {
     }
   };
 
-  const onSubmit: SubmitHandler<FormData> = (
+  const validateRateLimitExceeded = async () => {
+    const rateLimitResponse = await fetch("/api/rate-limit");
+    const rateLimitData = await rateLimitResponse.json();
+
+    if (rateLimitResponse.status === 429) {
+      displayToast(
+        rateLimitData?.message || SOMETHING_WENT_WRONG,
+        ToastVariant.ERROR
+      );
+      return true;
+    }
+    return false;
+  };
+
+  const onSubmit: SubmitHandler<FormData> = async (
     data,
     event?: React.BaseSyntheticEvent
-  ): void => {
+  ): Promise<void> => {
     event?.preventDefault();
     if (loading || !sketch || !data) return;
+
+    const ratelimitExceeded = await validateRateLimitExceeded();
+    if (ratelimitExceeded) return;
 
     setLoading(true);
     setSubmitted(true);

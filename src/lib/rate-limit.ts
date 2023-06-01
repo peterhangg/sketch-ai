@@ -2,9 +2,10 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { Ratelimit } from "@upstash/ratelimit";
 import requestIp from "request-ip";
 import { redis } from "./redis";
+import { formatTime } from "./utils";
 
-const REQUEST_LIMIT = 3;
-const LIMIT_DURATION = "60s";
+const REQUEST_LIMIT = 1;
+const LIMIT_DURATION = "1h";
 
 interface ValidateResponse {
   success: boolean;
@@ -43,10 +44,10 @@ class Ratelimiter {
     if (!result.success) {
       const now = Date.now();
       const resetTimer = Math.floor((result.reset - now) / 1000);
-
+      const { minutes, seconds } = formatTime(resetTimer);
       return {
         success: false,
-        message: `Request limit exceeded. Try again in ${resetTimer}s.`,
+        message: `Request limit exceeded. Try again in ${minutes} mins and ${seconds}s.`,
       };
     }
 
