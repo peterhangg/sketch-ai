@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 export function Footer() {
   return (
     <motion.footer
-      className="container mx-auto border-t border-t-slate-500 bg-white px-8"
+      className="container mx-auto border-t border-t-slate-500 bg-white px-4 py-10"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.5 }}

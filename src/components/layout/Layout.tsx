@@ -23,12 +23,14 @@ export function Layout({ children }: LayoutProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex h-screen min-h-screen w-screen flex-col">
+      <div className="flex min-h-screen flex-col">
         {router.pathname !== "/auth/login" && <Header />}
-        <main className="flex-1 p-4 antialiased">{children}</main>
+        <main className="flex flex-1 items-center justify-center p-3 antialiased">
+          {children}
+        </main>
         <Toaster />
-        <Footer />
-      </main>
+        {router.pathname !== "/auth/login" && <Footer />}
+      </div>
     </>
   );
 }
