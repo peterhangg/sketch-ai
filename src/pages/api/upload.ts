@@ -59,7 +59,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     });
 
     if (response.status !== 200) {
-      throw new Error("Failed to upload image to s3.");
+      throw new Error("Failed to upload image to S3.");
     }
 
     const s3FileUrl = `${S3Config.s3.baseObjectUrl}/${key}`;

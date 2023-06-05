@@ -46,12 +46,12 @@ async function handler(req: ReplicateApiRequest, _res: NextApiResponse) {
     throw new Error("The REPLICATE_API_KEY environment variable is not set.");
   }
 
-  const { imageUrl } = generateSchema.parse(req.body);
+  const { imageUrl, prompt } = generateSchema.parse(req.body);
 
   if (!imageUrl) {
     throw new Error("Please provide an image URL.");
   }
-  let prompt = "";
+
   if (!prompt) {
     throw new Error("Please provide a prompt for your sketch.");
   }

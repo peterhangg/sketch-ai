@@ -11,7 +11,7 @@ import { useDrawStore } from "@/state/drawStore";
 import { Canvas } from "@/components/Canvas";
 import { PromptForm } from "@/components/PromptForm";
 import { Spinner } from "@/components/ui/Spinner";
-import { buttonStyles } from "@/components/ui/Button";
+import { Button, buttonStyles } from "@/components/ui/Button";
 import { IconButton } from "@/components/IconButton";
 import { displayToast, ToastVariant } from "@/components/ui/Toast";
 import { blobToBase64, downloadImage } from "@/lib/blob";
@@ -25,7 +25,6 @@ interface HomeProps {
 }
 
 export default function Home({ user }: HomeProps) {
-  const [_error, setError] = React.useState<string | null>(null);
   const {
     sketch,
     generatedImage,
@@ -57,7 +56,6 @@ export default function Home({ user }: HomeProps) {
     formData.append("sketchData", sketchBase64Data);
 
     try {
-      setError(null);
       const response = await fetch("/api/upload", {
         method: "POST",
         body: formData,
@@ -65,9 +63,8 @@ export default function Home({ user }: HomeProps) {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data?.message || "Something went wrong");
         displayToast(
-          data?.message || "Something went wrong",
+          data?.message || "Failed to save sketch. Please contact admin.",
           ToastVariant.ERROR
         );
         return;
@@ -77,7 +74,7 @@ export default function Home({ user }: HomeProps) {
     } catch (error) {
       console.error(error);
     }
-  }, [user, sketchBlob, setError, saved, setSaved]);
+  }, [user, sketchBlob, saved, setSaved]);
 
   return (
     <>
@@ -133,7 +130,7 @@ export default function Home({ user }: HomeProps) {
               {sketch && (
                 <motion.div
                   key="22"
-                  className="flex flex-col px-2"
+                  className="flex h-full flex-col px-2"
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true, amount: 0.5 }}
@@ -146,10 +143,9 @@ export default function Home({ user }: HomeProps) {
                   <Image
                     alt="sketch drawing"
                     src={sketch}
-                    className="rounded-2xl border border-slate-900"
-                    unoptimized={true}
+                    className="h-full rounded-2xl border border-slate-900"
                     width={500}
-                    height={650}
+                    height={600}
                   />
                   <div className="flex justify-end p-1">
                     <IconButton
@@ -163,7 +159,7 @@ export default function Home({ user }: HomeProps) {
                 </motion.div>
               )}
 
-              {!loading && generatedImage && (
+              {!loading && generatedImage && !generateError && (
                 <motion.div
                   key="33"
                   className="mt-5 flex h-full flex-col md:mt-0"
@@ -178,15 +174,45 @@ export default function Home({ user }: HomeProps) {
                 >
                   <Image
                     alt="generated image"
-                    src={generateError ? ErrorPlaceholder : generatedImage}
+                    src={generatedImage}
                     className="h-full rounded-2xl border border-slate-900"
                     width={500}
-                    height={650}
+                    height={600}
                   />
                   <div className="flex justify-end p-1">
                     <IconButton
                       icon={<ArrowDownTrayIcon />}
                       onClick={() => downloadImage(generatedImage)}
+                    />
+                  </div>
+                </motion.div>
+              )}
+
+              {!loading && generateError && (
+                <motion.div
+                  key="44"
+                  className="mt-5 flex h-full flex-col md:mt-0"
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.5 }}
+                  transition={{ delay: 0.1, duration: 0.5 }}
+                  variants={{
+                    hidden: { opacity: 0, x: -50 },
+                    visible: { opacity: 1, x: 0 },
+                  }}
+                >
+                  <Image
+                    alt="Error image"
+                    src={ErrorPlaceholder}
+                    className="rounded-2xl border border-slate-900"
+                    width={500}
+                    height={600}
+                  />
+                  <div className="flex justify-end p-1">
+                    <IconButton
+                      icon={<ArrowDownTrayIcon />}
+                      onClick={() => downloadImage(generatedImage)}
+                      disabled={true}
                     />
                   </div>
                 </motion.div>
@@ -204,8 +230,8 @@ export default function Home({ user }: HomeProps) {
                 visible: { opacity: 1, x: 0 },
               }}
             >
-              <button
-                className={cn(buttonStyles({ size: "lg" }))}
+              <Button
+                className={cn(buttonStyles({}))}
                 onClick={backHandler}
                 disabled={loading}
               >
@@ -217,7 +243,7 @@ export default function Home({ user }: HomeProps) {
                     Start a new sketch
                   </>
                 )}
-              </button>
+              </Button>
             </motion.div>
           </AnimatePresence>
         )}
