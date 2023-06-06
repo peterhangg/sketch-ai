@@ -5,7 +5,7 @@ import {
   TrashIcon,
   ArrowDownTrayIcon,
 } from "@heroicons/react/24/solid";
-import { IconButton } from "./IconButton";
+import { IconButton } from "./ui/IconButton";
 import { ColorPicker } from "./ColorPicker";
 import { useOnDraw } from "@/hooks/useOnDraw";
 import { useDrawStore } from "@/state/drawStore";

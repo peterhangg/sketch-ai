@@ -2,8 +2,8 @@ import React from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { Toaster } from "react-hot-toast";
-import { Header } from "../ui/Header";
-import { Footer } from "../ui/Footer";
+import { Header } from "../Header";
+import { Footer } from "../Footer";
 
 interface LayoutProps {
   children: React.ReactNode;
