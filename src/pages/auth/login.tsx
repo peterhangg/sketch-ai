@@ -14,7 +14,7 @@ import DiscordIcon from "../../../public/discord.svg";
 
 export default function LoginPage() {
   return (
-    <div className="flex h-full items-center justify-center">
+    <div className="flex flex-1 items-center justify-center">
       <motion.div
         className="absolute left-2 top-2 md:left-8 md:top-8"
         initial="hidden"

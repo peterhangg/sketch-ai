@@ -20,7 +20,7 @@ export const sleep = (ms: number) =>
 export async function pollUntilDone<T>(
   fn: () => Promise<T>,
   intervalMs = 1000,
-  timeoutMs = 30000
+  timeoutMs = 20000
 ): Promise<T> {
   const start = Date.now();
 
