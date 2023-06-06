@@ -18,7 +18,6 @@ export function getServerErrorFromUnknown(error: unknown): {
   statusCode: number;
   message: string;
 } {
-  console.log({ error });
   if (error instanceof FormidableError) {
     return { statusCode: 400, message: error.message };
   }

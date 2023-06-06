@@ -31,7 +31,7 @@ async function getGeneratedImage(responseUrl: string): Promise<string[]> {
     if (data.status === SUCCEEDED) {
       return data.output;
     } else if (data.status === FAILED) {
-      throw new Error("Failed to generate image");
+      throw new Error("Failed to generate image.");
     } else {
       throw new Error("Something went wrong while generating image.");
     }
@@ -49,7 +49,7 @@ async function handler(req: ReplicateApiRequest, _res: NextApiResponse) {
   const { imageUrl, prompt } = generateSchema.parse(req.body);
 
   if (!imageUrl) {
-    throw new Error("Please provide an image URL.");
+    throw new Error("Sketch was not provided.");
   }
 
   if (!prompt) {
