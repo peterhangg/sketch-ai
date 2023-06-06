@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { buttonStyles } from "./Button";
+import { buttonStyles } from "./ui/Button";
 
 export function Header() {
   const { data: session } = useSession();

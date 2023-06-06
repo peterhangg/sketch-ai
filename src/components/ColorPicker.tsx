@@ -1,6 +1,6 @@
 import { BLACK, WHITE } from "@/lib/constants";
 import React from "react";
-import { IconButton } from "./IconButton";
+import { IconButton } from "./ui/IconButton";
 // import { PaintBrushIcon } from "@heroicons/react/24/solid";
 import useColorPickerStore from "@/state/colorPickerStore";
 

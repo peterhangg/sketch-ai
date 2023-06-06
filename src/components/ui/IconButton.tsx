@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 interface IconButtonProps {
   icon: React.ReactNode;
-  className?: string;
+  className?: React.HTMLAttributes<HTMLElement>["className"];
   onClick?: () => void;
   disabled?: boolean;
 }

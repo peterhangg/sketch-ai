@@ -12,7 +12,7 @@ import { Canvas } from "@/components/Canvas";
 import { PromptForm } from "@/components/PromptForm";
 import { Spinner } from "@/components/ui/Spinner";
 import { Button, buttonStyles } from "@/components/ui/Button";
-import { IconButton } from "@/components/IconButton";
+import { IconButton } from "@/components/ui/IconButton";
 import { displayToast, ToastVariant } from "@/components/ui/Toast";
 import { blobToBase64, downloadImage } from "@/lib/blob";
 import { getServerAuthSession } from "@/lib/auth";

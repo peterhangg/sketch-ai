@@ -8,7 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { isValidUrl } from "@/lib/utils";
 import { Sketch, User } from "@prisma/client";
 import { Spinner } from "@/components/ui/Spinner";
-import { IconButton } from "@/components/IconButton";
+import { IconButton } from "@/components/ui/IconButton";
 import { TrashIcon, PencilIcon } from "@heroicons/react/24/solid";
 import { displayToast, ToastVariant } from "@/components/ui/Toast";
 import { useIntersection } from "@/hooks/useIntersection";
