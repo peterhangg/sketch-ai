@@ -1,5 +1,5 @@
 import { ZodError, ZodIssue } from "zod";
-import { PrismaClientUnknownRequestError } from "@prisma/client/runtime";
+import { PrismaClientUnknownRequestError } from "@prisma/client/runtime/library";
 import { FormidableError } from "../form-parse";
 
 function parseZodIssues(issues: ZodIssue[]): string {

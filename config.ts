@@ -14,8 +14,8 @@ export const config = {
       allowDangerousEmailAccountLinking: true,
     },
     discord: {
-      clientId: process.env.DISCORD_CLIENT_ID!,
-      clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+      clientId: process.env.DISCORD_CLIENT_ID,
+      clientSecret: process.env.DISCORD_CLIENT_SECRET,
       authorization: { params: { scope: "identify" } },
       allowDangerousEmailAccountLinking: true,
     },
@@ -28,7 +28,7 @@ export const config = {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
     },
-    defaultFolder: process.env.S3_DEFAULT_FOLDER || "sketches",
+    defaultFolder: process.env.S3_DEFAULT_FOLDER! || "sketches",
   },
   upstash: {
     redis: {

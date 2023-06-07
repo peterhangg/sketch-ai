@@ -1,5 +1,6 @@
 import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { PollOptions } from "./types";
 
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
@@ -17,32 +18,23 @@ export function isValidUrl(url: string): boolean {
 export const sleep = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
-export async function pollUntilDone<T>(
-  fn: () => Promise<T>,
-  intervalMs = 1000,
-  timeoutMs = 20000
-): Promise<T> {
-  const start = Date.now();
+export async function poll<T>({
+  fn,
+  validateFn,
+  interval = 1000,
+  timeout = 20000,
+}: PollOptions<T>): Promise<T> {
+  const startTime = Date.now();
+  let result: T;
 
-  while (true) {
-    try {
-      const result = await fn();
+  while (Date.now() - startTime < timeout) {
+    result = await fn();
+    if (validateFn(result)) {
       return result;
-    } catch (error) {
-      if (Date.now() - start > timeoutMs) {
-        if (error instanceof Error) {
-          throw new Error(
-            `Function timed out after ${timeoutMs} ms: ${error.message}`
-          );
-        } else {
-          throw new Error(
-            `Function timed out after ${timeoutMs} ms: Unknown error occurred`
-          );
-        }
-      }
     }
-    await sleep(intervalMs);
+    await sleep(interval);
   }
+  throw new Error(`Polling timed out after ${timeout} ms`);
 }
 
 export function formatTime(seconds: number) {

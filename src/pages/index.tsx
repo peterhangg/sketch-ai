@@ -92,7 +92,7 @@ export default function Home({ user }: HomeProps) {
                 visible: { opacity: 1, x: 0 },
               }}
             >
-              Turn your sketches into AI generated image
+              Turn your sketch into an AI generated image
             </motion.h1>
             <motion.div
               className="container mt-3 flex w-full items-center justify-center p-2"
@@ -126,7 +126,7 @@ export default function Home({ user }: HomeProps) {
             >
               AI Generated Image Results
             </motion.h1>
-            <div className="container mt-4 flex flex-col items-center justify-center p-2 md:flex-row md:space-x-4">
+            <div className="container mt-4 grid grid-cols-1 items-center justify-center gap-2 md:grid-cols-2 md:flex-row md:space-x-6">
               {sketch && (
                 <motion.div
                   key="22"
@@ -143,7 +143,7 @@ export default function Home({ user }: HomeProps) {
                   <Image
                     alt="sketch drawing"
                     src={sketch}
-                    className="h-full rounded-2xl border border-slate-900"
+                    className="h-full max-h-[600px] rounded-2xl border border-slate-900 object-cover"
                     width={500}
                     height={600}
                   />
@@ -175,7 +175,7 @@ export default function Home({ user }: HomeProps) {
                   <Image
                     alt="generated image"
                     src={generatedImage}
-                    className="h-full rounded-2xl border border-slate-900"
+                    className="h-full max-h-[600px] rounded-2xl border border-slate-900 object-cover"
                     width={500}
                     height={600}
                   />
@@ -204,7 +204,7 @@ export default function Home({ user }: HomeProps) {
                   <Image
                     alt="Error image"
                     src={ErrorPlaceholder}
-                    className="rounded-2xl border border-slate-900"
+                    className="h-full max-h-[600px] rounded-2xl border border-slate-900 object-cover"
                     width={500}
                     height={600}
                   />

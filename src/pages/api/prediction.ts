@@ -1,9 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { DefaultNextApiHandler } from "@/lib/server/DefaultNextApiHandler";
-import { FAILED, SUCCEEDED } from "@/lib/constants";
+import { SUCCEEDED } from "@/lib/constants";
 import { generateSchema } from "@/lib/validations";
-import { pollUntilDone } from "@/lib/utils";
+import { poll } from "@/lib/utils";
 import { config } from "../../../config";
+import { Replicate } from "@/lib/types";
 
 interface ReplicateApiRequest extends NextApiRequest {
   body: {
@@ -19,7 +20,7 @@ async function getGeneratedImage(responseUrl: string): Promise<string[]> {
     );
   }
 
-  const fetchData = async (): Promise<string[]> => {
+  const fetchReplicate = async (): Promise<Replicate> => {
     const response = await fetch(responseUrl, {
       method: "GET",
       headers: {
@@ -28,20 +29,24 @@ async function getGeneratedImage(responseUrl: string): Promise<string[]> {
       },
     });
     const data = await response.json();
-    if (data.status === SUCCEEDED) {
-      return data.output;
-    } else if (data.status === FAILED) {
-      throw new Error("Failed to generate image.");
-    } else {
-      throw new Error("Something went wrong while generating image.");
-    }
+    return data;
   };
 
-  const generatedImage = await pollUntilDone(fetchData);
-  return generatedImage;
+  try {
+    const data = await poll({
+      fn: fetchReplicate,
+      validateFn: (result) => result.status === SUCCEEDED,
+    });
+    return data.output;
+  } catch (error) {
+    throw new Error("Failed to generate image. Please contact admin.");
+  }
 }
 
-async function handler(req: ReplicateApiRequest, _res: NextApiResponse) {
+async function handler(
+  req: ReplicateApiRequest,
+  _res: NextApiResponse<string | { message: string }>
+) {
   if (!config.replicate.apiKey) {
     throw new Error("The REPLICATE_API_KEY environment variable is not set.");
   }
@@ -72,8 +77,14 @@ async function handler(req: ReplicateApiRequest, _res: NextApiResponse) {
       }
     );
 
-    const data = await response.json();
-    const generatedImages = await getGeneratedImage(data?.urls?.get);
+    const data: Replicate = await response.json();
+    if (!data?.urls) {
+      throw new Error(
+        "Unexpected error occured while generating image. Please contact admin."
+      );
+    }
+
+    const generatedImages = await getGeneratedImage(data.urls.get);
     const [_negativePromptImage, userPromptImage] = generatedImages;
 
     return userPromptImage;

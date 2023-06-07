@@ -45,6 +45,7 @@ class Ratelimiter {
       const now = Date.now();
       const resetTimer = Math.floor((result.reset - now) / 1000);
       const { minutes, seconds } = formatTime(resetTimer);
+
       return {
         success: false,
         message: `Request limit exceeded. Try again in ${minutes} mins and ${seconds}s.`,
