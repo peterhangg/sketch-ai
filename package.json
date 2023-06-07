@@ -12,7 +12,8 @@
     "prettier:check": "prettier --check \"./src/**/*.{ts,tsx}\"",
     "prepare": "husky install",
     "migrate-dev": "npx prisma migrate dev",
-    "migrate": "prisma migrate deploy"
+    "migrate": "prisma migrate deploy",
+    "prisma-sync": "npx prisma db push"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.319.0",

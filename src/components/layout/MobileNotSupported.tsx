@@ -9,7 +9,7 @@ export const MobileNotSupported = ({ children }: MobileProps) => {
   const { tailwindSize } = useWindowSize();
 
   return tailwindSize === "sm" ? (
-    <div className="flex h-full items-center justify-center">
+    <div className="flex flex-1 items-center justify-center">
       <div className="flex flex-col items-center sm:hidden">
         <h1 className="text-2xl font-bold">Mobile not supported yet</h1>
         <p className="text-subtle">

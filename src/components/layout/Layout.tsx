@@ -25,7 +25,7 @@ export function Layout({ children }: LayoutProps) {
       </Head>
       <div className="flex min-h-screen flex-col">
         {router.pathname !== "/auth/login" && <Header />}
-        <main className="flex flex-1 items-center justify-center p-3 antialiased">
+        <main className="flex flex-1 justify-center p-3 antialiased">
           {children}
         </main>
         <Toaster />

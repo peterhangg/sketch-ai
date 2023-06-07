@@ -78,7 +78,7 @@ export default function Home({ user }: HomeProps) {
 
   return (
     <>
-      <div className="flex h-full flex-col items-center justify-center">
+      <div className="flex flex-1 flex-col items-center justify-center">
         {!submitted ? (
           <>
             <motion.h1
@@ -126,7 +126,7 @@ export default function Home({ user }: HomeProps) {
             >
               AI Generated Image Results
             </motion.h1>
-            <div className="container mt-4 grid grid-cols-1 items-center justify-center gap-2 md:grid-cols-2 md:flex-row md:space-x-6">
+            <div className="container mt-4 flex flex-col items-center justify-center md:flex-row md:space-x-6">
               {sketch && (
                 <motion.div
                   key="22"
