@@ -19,3 +19,39 @@ export enum ImageFileExtension {
   JPG = ".jpg",
   JPEG = ".jpeg",
 }
+
+export interface PollOptions<T> {
+  fn: () => Promise<T>;
+  validateFn: (result: T) => boolean;
+  interval?: number;
+  timeout?: number;
+}
+
+export interface Replicate {
+  id: string;
+  version: string;
+  urls: ReplicateMetricsUrls;
+  created_at: Date;
+  started_at: Date;
+  completed_at: Date;
+  source: string;
+  status: string;
+  input: ReplicateInput;
+  output: string[];
+  error: null;
+  logs: string;
+  metrics: ReplicateMetrics;
+}
+
+interface ReplicateInput {
+  prompt: string;
+}
+
+interface ReplicateMetrics {
+  predict_time: number;
+}
+
+interface ReplicateMetricsUrls {
+  get: string;
+  cancel: string;
+}

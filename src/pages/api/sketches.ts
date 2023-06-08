@@ -13,6 +13,7 @@ interface ResponseData {
   hasMore: boolean;
   cursor: string | null;
 }
+
 async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData | { message: string }>
@@ -49,13 +50,13 @@ async function handler(
       createdAt: sketch.createdAt.toISOString(),
     }));
 
-    const response: ResponseData = {
+    const data: ResponseData = {
       sketches: formattedSketches,
       hasMore,
       cursor: nextCursor,
     };
 
-    return response;
+    return data;
   }
 }
 

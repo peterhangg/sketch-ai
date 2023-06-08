@@ -24,6 +24,15 @@ export function Footer({ className }: FooterProps) {
           Built with{" "}
           <a
             className="font-bold underline underline-offset-4 transition hover:text-black/70"
+            href="https://nextjs.org"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Next.js
+          </a>
+          ,{" "}
+          <a
+            className="font-bold underline underline-offset-4 transition hover:text-black/70"
             href="https://vercel.com"
             target="_blank"
             rel="noreferrer"
@@ -42,20 +51,11 @@ export function Footer({ className }: FooterProps) {
           ,{" "}
           <a
             className="font-bold underline underline-offset-4 transition hover:text-black/70"
-            href={"https://aws.amazon.com"}
+            href="https://aws.amazon.com"
             target="_blank"
             rel="noreferrer"
           >
             AWS
-          </a>
-          ,{" "}
-          <a
-            className="font-bold underline underline-offset-4 transition hover:text-black/70"
-            href={"https://nextjs.org"}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Next.js
           </a>
           .
         </div>

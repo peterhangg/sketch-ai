@@ -114,7 +114,7 @@ export default function GalleryPage({
   );
 
   return (
-    <div className="flex flex-col items-center justify-center">
+    <div className="flex flex-1 flex-col items-center justify-center">
       <h1 className="mt-4 text-2xl font-semibold tracking-tighter">
         Sketch Gallery
       </h1>
@@ -164,17 +164,7 @@ export default function GalleryPage({
 
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const session = await getServerAuthSession(ctx);
-
-  if (!session || !session?.user) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
-
-  const userId = session.user.id;
+  const userId = session?.user.id;
   const sketches = await prisma.sketch.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
@@ -191,7 +181,7 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
 
   return {
     props: {
-      user: session.user || null,
+      user: session?.user || null,
       initialSketches: formattedSketches,
       hasMore,
       cursor,

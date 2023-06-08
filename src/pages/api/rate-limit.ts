@@ -5,7 +5,7 @@ const ratelimiter = new Ratelimiter();
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse<{ message: string }>
 ) {
   const { success, message } = await ratelimiter.validate(req, res);
   if (!success) {
