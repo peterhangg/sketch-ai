@@ -22,7 +22,7 @@ export async function poll<T>({
   fn,
   validateFn,
   interval = 1000,
-  timeout = 20000,
+  timeout = 75000,
 }: PollOptions<T>): Promise<T> {
   const startTime = Date.now();
   let result: T;

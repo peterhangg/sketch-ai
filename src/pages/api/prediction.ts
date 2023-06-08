@@ -72,7 +72,14 @@ async function handler(
         },
         body: JSON.stringify({
           version: config.replicate.modelVersion,
-          input: { image: imageUrl, prompt },
+          input: {
+            image: imageUrl,
+            prompt,
+            a_prompt:
+              "best quality, extremely detailed, ultra-detailed, ultra-realistic, cinematic photo",
+            n_prompt:
+              "longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality",
+          },
         }),
       }
     );
