@@ -137,7 +137,7 @@ export default function GalleryPage({
                 <Image
                   alt="sketch image"
                   src={sketch.url}
-                  className="max-h-[500px] w-full max-w-[500] rounded-2xl border border-slate-900"
+                  className="max-h-[500px] w-full max-w-[500] rounded-2xl border border-slate-900 shadow-card"
                   width={500}
                   height={500}
                 />
