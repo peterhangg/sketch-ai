@@ -23,6 +23,7 @@ export enum ImageFileExtension {
 export interface PollOptions<T> {
   fn: () => Promise<T>;
   validateFn: (result: T) => boolean;
+  exitFn: (result: T) => boolean;
   interval?: number;
   timeout?: number;
 }

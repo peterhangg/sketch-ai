@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React from "react";
 import { GetServerSidePropsContext } from "next";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -7,7 +7,6 @@ import { getServerAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isValidUrl } from "@/lib/utils";
 import { Sketch, User } from "@prisma/client";
-import { Spinner } from "@/components/ui/Spinner";
 import { IconButton } from "@/components/ui/IconButton";
 import { TrashIcon, PencilIcon } from "@heroicons/react/24/solid";
 import { displayToast, ToastVariant } from "@/components/ui/Toast";
@@ -28,10 +27,10 @@ export default function GalleryPage({
   hasMore,
   cursor,
 }: GalleryPageProps) {
-  const [sketchList, setSketchList] = React.useState(initialSketches);
-  const [loading, setLoading] = React.useState(false);
+  const [sketchList, setSketchList] = React.useState<Sketch[]>(initialSketches);
+  const [loading, setLoading] = React.useState<boolean>(false);
   const [_error, setError] = React.useState<string | null>(null);
-  const [hasMoreData, setHasMoreData] = React.useState(hasMore);
+  const [hasMoreData, setHasMoreData] = React.useState<boolean>(hasMore);
   const [nextCursor, setNextCursor] = React.useState<string | null>(cursor);
   const { setSketch, setSrcFromGallery, reset } = useDrawStore(
     (state) => state
@@ -133,15 +132,13 @@ export default function GalleryPage({
               }}
               transition={{ delay: 0.1, duration: 0.5 }}
             >
-              <Suspense fallback={<Spinner />}>
-                <Image
-                  alt="sketch image"
-                  src={sketch.url}
-                  className="max-h-[500px] w-full max-w-[500] rounded-2xl border border-slate-900"
-                  width={500}
-                  height={500}
-                />
-              </Suspense>
+              <Image
+                alt="sketch image"
+                src={sketch.url}
+                className="max-h-[500px] w-full max-w-[500] rounded-2xl border border-slate-900 shadow-card"
+                width={500}
+                height={500}
+              />
               <div className="mt-1 flex justify-end p-1">
                 <IconButton
                   icon={<PencilIcon />}

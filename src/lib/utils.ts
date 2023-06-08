@@ -21,8 +21,9 @@ export const sleep = (ms: number) =>
 export async function poll<T>({
   fn,
   validateFn,
-  interval = 1000,
-  timeout = 20000,
+  exitFn,
+  interval = 1500,
+  timeout = 60000,
 }: PollOptions<T>): Promise<T> {
   const startTime = Date.now();
   let result: T;
@@ -31,6 +32,9 @@ export async function poll<T>({
     result = await fn();
     if (validateFn(result)) {
       return result;
+    }
+    if (exitFn(result)) {
+      throw new Error(`Polling exited early after ${timeout} ms`);
     }
     await sleep(interval);
   }

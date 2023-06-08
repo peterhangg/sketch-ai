@@ -143,7 +143,7 @@ export default function Home({ user }: HomeProps) {
                   <Image
                     alt="sketch drawing"
                     src={sketch}
-                    className="h-full max-h-[600px] rounded-2xl border border-slate-900 object-cover"
+                    className="h-full max-h-[600px] rounded-2xl border border-slate-900 shadow-card"
                     width={500}
                     height={600}
                   />
@@ -175,7 +175,7 @@ export default function Home({ user }: HomeProps) {
                   <Image
                     alt="generated image"
                     src={generatedImage}
-                    className="h-full max-h-[600px] rounded-2xl border border-slate-900 object-cover"
+                    className="h-full max-h-[600px] rounded-2xl border border-slate-900 shadow-card"
                     width={500}
                     height={600}
                   />
@@ -204,7 +204,7 @@ export default function Home({ user }: HomeProps) {
                   <Image
                     alt="Error image"
                     src={ErrorPlaceholder}
-                    className="h-full max-h-[600px] rounded-2xl border border-slate-900 object-cover"
+                    className="h-full max-h-[600px] rounded-2xl border border-slate-900 object-cover shadow-card"
                     width={500}
                     height={600}
                   />

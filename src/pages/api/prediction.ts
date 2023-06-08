@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { DefaultNextApiHandler } from "@/lib/server/DefaultNextApiHandler";
-import { SUCCEEDED } from "@/lib/constants";
+import { FAILED, SUCCEEDED } from "@/lib/constants";
 import { generateSchema } from "@/lib/validations";
 import { poll } from "@/lib/utils";
 import { config } from "../../../config";
@@ -36,6 +36,7 @@ async function getGeneratedImage(responseUrl: string): Promise<string[]> {
     const data = await poll({
       fn: fetchReplicate,
       validateFn: (result) => result.status === SUCCEEDED,
+      exitFn: (result) => result.status === FAILED,
     });
     return data.output;
   } catch (error) {
@@ -72,7 +73,14 @@ async function handler(
         },
         body: JSON.stringify({
           version: config.replicate.modelVersion,
-          input: { image: imageUrl, prompt },
+          input: {
+            image: imageUrl,
+            prompt,
+            a_prompt:
+              "best quality, extremely detailed, ultra-detailed, ultra-realistic, cinematic photo",
+            n_prompt:
+              "longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality",
+          },
         }),
       }
     );

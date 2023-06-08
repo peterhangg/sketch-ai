@@ -14,6 +14,9 @@ interface ResponseData {
   cursor: string | null;
 }
 
+const isValidDate = (dateObject: any) =>
+  new Date(dateObject).toString() !== "Invalid Date";
+
 async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData | { message: string }>
@@ -26,9 +29,20 @@ async function handler(
   const userId = session.user.id;
 
   if (req.method === "GET") {
-    let cursor = req.query.cursor
-      ? new Date(req.query.cursor.toString())
-      : undefined;
+    let cursor;
+
+    if (req.query.cursor) {
+      let dateValue = req.query.cursor;
+      if (Array.isArray(dateValue)) {
+        dateValue = dateValue[0];
+      }
+
+      const date = new Date(dateValue);
+      if (isNaN(date.getTime())) {
+        throw new Error("Failed to fetch sketches. Please contact admin");
+      }
+      cursor = date;
+    }
 
     const sketches = await prisma.sketch.findMany({
       where: {

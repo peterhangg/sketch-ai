@@ -4,7 +4,7 @@ import requestIp from "request-ip";
 import { redis } from "./redis";
 import { formatTime } from "./utils";
 
-const REQUEST_LIMIT = 5;
+const REQUEST_LIMIT = 12;
 const LIMIT_DURATION = "1h";
 
 interface ValidateResponse {
