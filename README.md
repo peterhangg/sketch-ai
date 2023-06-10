@@ -20,7 +20,7 @@ To get a local copy up and running, please follow these simple steps.
 
 ### Prerequisites
 
-- Node.js **(Version: >=16.x)**
+- Node.js **(Version: >=18.x)**
 - Use node version that was used during initial set up configuration
   ```sh
   nvm use
