@@ -22,7 +22,7 @@ export async function poll<T>({
   fn,
   validateFn,
   exitFn,
-  interval = 1500,
+  interval = 1000,
   timeout = 60000,
 }: PollOptions<T>): Promise<T> {
   const startTime = Date.now();
@@ -30,6 +30,10 @@ export async function poll<T>({
 
   while (Date.now() - startTime < timeout) {
     result = await fn();
+    // TODO: Integrate logger
+    if (process.env.NEXT_PUBLIC_DEBUG) {
+      console.log({ result });
+    }
     if (validateFn(result)) {
       return result;
     }

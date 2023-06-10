@@ -20,7 +20,7 @@ async function getGeneratedImage(responseUrl: string): Promise<string[]> {
     );
   }
 
-  const fetchReplicate = async (): Promise<Replicate> => {
+  const fetchReplicateResponse = async (): Promise<Replicate> => {
     const response = await fetch(responseUrl, {
       method: "GET",
       headers: {
@@ -34,7 +34,7 @@ async function getGeneratedImage(responseUrl: string): Promise<string[]> {
 
   try {
     const data = await poll({
-      fn: fetchReplicate,
+      fn: fetchReplicateResponse,
       validateFn: (result) => result.status === SUCCEEDED,
       exitFn: (result) => result.status === FAILED,
     });
@@ -93,6 +93,10 @@ async function handler(
     }
 
     const generatedImages = await getGeneratedImage(data.urls.get);
+    // TODO: Integrate logger
+    if (process.env.NEXT_PUBLIC_DEBUG) {
+      console.log({ generatedImages });
+    }
     const [_negativePromptImage, userPromptImage] = generatedImages;
 
     return userPromptImage;
