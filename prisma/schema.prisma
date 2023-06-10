@@ -5,9 +5,9 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql" // PlanetScale doesn't support postgresql yet
+  provider = "mysql"
   url      = env("DATABASE_URL")
-  relationMode = "prisma" // PlanetScale requirement
+  relationMode = "prisma"
 }
 
 model Account {
