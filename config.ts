@@ -21,14 +21,14 @@ export const config = {
     },
   },
   s3: {
-    region: process.env.AWS_S3_BUCKET_REGION!,
-    bucketName: process.env.AWS_S3_BUCKET_NAME!,
-    baseObjectUrl: `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_BUCKET_REGION}.amazonaws.com`,
+    region: process.env.SECRET_AWS_S3_BUCKET_REGION!,
+    bucketName: process.env.SECRET_AWS_S3_BUCKET_NAME!,
+    baseObjectUrl: `https://${process.env.SECRET_AWS_S3_BUCKET_NAME}.s3.${process.env.SECRET_AWS_S3_BUCKET_REGION}.amazonaws.com`,
     credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+      accessKeyId: process.env.SECRET_AWS_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.SECRET_AWS_SECRET_ACCESS_KEY!,
     },
-    defaultFolder: process.env.S3_DEFAULT_FOLDER! || "sketches",
+    defaultFolder: process.env.SECRET_AWS_S3_DEFAULT_FOLDER! || "sketches",
   },
   upstash: {
     redis: {
