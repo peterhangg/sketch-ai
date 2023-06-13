@@ -105,13 +105,7 @@ export const useOnDraw = () => {
       const ctx = canvas.getContext("2d", { willReadFrequently: true });
       if (!ctx || !currPoint) return;
 
-      const drawObj = {
-        ctx,
-        currPoint,
-        prevPoint: prevPoint.current,
-        color,
-      };
-      draw(drawObj);
+      draw({ ctx, currPoint, prevPoint: prevPoint.current, color });
       prevPoint.current = currPoint;
     };
 
