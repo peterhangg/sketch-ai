@@ -1,10 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { DefaultNextApiHandler } from "@/lib/server/DefaultNextApiHandler";
-import { FAILED, SUCCEEDED } from "@/lib/constants";
 import { generateSchema } from "@/lib/validations";
-import { poll } from "@/lib/utils";
-import { config } from "../../../config";
+import { config } from "../../../../config";
 import { Replicate } from "@/lib/types";
+import { poll } from "@/lib/utils";
+import { FAILED, SUCCEEDED } from "@/lib/constants";
 
 interface ReplicateApiRequest extends NextApiRequest {
   body: {
@@ -86,20 +86,11 @@ async function handler(
     );
 
     const data: Replicate = await response.json();
-    if (!data?.urls) {
-      throw new Error(
-        "Unexpected error occured while generating image. Please contact admin."
-      );
-    }
-
-    const generatedImages = await getGeneratedImage(data.urls.get);
     // TODO: Integrate logger
     if (process.env.NEXT_PUBLIC_DEBUG) {
-      console.log({ generatedImages });
+      console.log("Submitting sketch data: ", data);
     }
-    const [_negativePromptImage, userPromptImage] = generatedImages;
-
-    return userPromptImage;
+    return data;
   }
 }
 

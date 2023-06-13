@@ -20,7 +20,6 @@ const colorPalette = [
   "#0000FF",
   "#FF00FF",
   "#8B00FF",
-  "#aa00aa",
   "#ffffff",
 ];
 

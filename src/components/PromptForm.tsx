@@ -6,12 +6,13 @@ import { motion } from "framer-motion";
 import { Input } from "./ui/Input";
 import { Button } from "./ui/Button";
 import { displayToast, ToastVariant } from "./ui/Toast";
+import { ErrorMessage } from "./ui/ErrorMessage";
 import { useDrawStore } from "@/state/drawStore";
 import useColorPickerStore from "@/state/colorPickerStore";
 import { promptSchema } from "@/lib/validations";
 import { blobUrlToDataURL } from "@/lib/blob";
-import { ErrorMessage } from "./ui/ErrorMessage";
-import { SOMETHING_WENT_WRONG } from "@/lib/constants";
+import { sleep } from "@/lib/utils";
+import { FAILED, SOMETHING_WENT_WRONG, SUCCEEDED } from "@/lib/constants";
 
 type FormData = z.infer<typeof promptSchema>;
 
@@ -46,8 +47,8 @@ export function PromptForm() {
   ): Promise<void> => {
     try {
       setGenerateError("");
-      const sketchDataUrl = await blobUrlToDataURL(imageUrl);
 
+      const sketchDataUrl = await blobUrlToDataURL(imageUrl);
       const response = await fetch("/api/prediction", {
         method: "POST",
         headers: {
@@ -55,16 +56,41 @@ export function PromptForm() {
         },
         body: JSON.stringify({ imageUrl: sketchDataUrl, prompt }),
       });
-
-      const data = await response.json();
+      const responseData = await response.json();
 
       if (!response.ok) {
-        setGenerateError(data?.message || SOMETHING_WENT_WRONG);
-        displayToast(data?.message || SOMETHING_WENT_WRONG, ToastVariant.ERROR);
+        setGenerateError(responseData?.message || SOMETHING_WENT_WRONG);
+        displayToast(
+          responseData?.message || SOMETHING_WENT_WRONG,
+          ToastVariant.ERROR
+        );
         return;
       }
 
-      setGeneratedImage(data);
+      const startTime = Date.now();
+      const timeout = 60000;
+      let predictionImage = null;
+
+      while (!predictionImage) {
+        const response = await fetch(`/api/prediction/${responseData.id}`);
+        const data = await response.json();
+        const timeoutDelta = Date.now() - startTime;
+
+        if (data.status === SUCCEEDED) {
+          predictionImage = data.output;
+        }
+        if (data.status === FAILED || timeoutDelta >= timeout) {
+          setGenerateError(SOMETHING_WENT_WRONG);
+          displayToast(SOMETHING_WENT_WRONG, ToastVariant.ERROR);
+          return;
+        }
+        await sleep(1500);
+      }
+
+      if (predictionImage) {
+        const [_negativeImage, promptImage] = predictionImage;
+        setGeneratedImage(promptImage);
+      }
     } catch (error) {
       console.error(error);
     } finally {
