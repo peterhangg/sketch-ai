@@ -8,11 +8,16 @@ import { prisma } from "@/lib/prisma";
 import { isValidUrl } from "@/lib/utils";
 import { Sketch, User } from "@prisma/client";
 import { IconButton } from "@/components/ui/IconButton";
-import { TrashIcon, PencilIcon } from "@heroicons/react/24/solid";
+import {
+  TrashIcon,
+  PencilIcon,
+  ArrowDownTrayIcon,
+} from "@heroicons/react/24/solid";
 import { displayToast, ToastVariant } from "@/components/ui/Toast";
 import { useIntersection } from "@/hooks/useIntersection";
 import { useDrawStore } from "@/state/drawStore";
 import { SOMETHING_WENT_WRONG } from "@/lib/constants";
+import { downloadImage } from "@/lib/blob";
 
 interface GalleryPageProps {
   user: User;
@@ -143,11 +148,16 @@ export default function GalleryPage({
                 <IconButton
                   icon={<PencilIcon />}
                   onClick={() => setSketchHandler(sketch.url)}
-                  className="mx-2"
+                  className="mr-2"
                 />
                 <IconButton
                   icon={<TrashIcon />}
                   onClick={() => deleteHandler(sketch.url)}
+                  className="mr-2"
+                />
+                <IconButton
+                  icon={<ArrowDownTrayIcon />}
+                  onClick={() => downloadImage(sketch.url)}
                 />
               </div>
             </motion.div>
