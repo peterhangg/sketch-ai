@@ -4,6 +4,7 @@ import {
   ArrowUturnRightIcon,
   TrashIcon,
   ArrowDownTrayIcon,
+  ArrowUpOnSquareStackIcon,
 } from "@heroicons/react/24/solid";
 import { IconButton } from "./ui/IconButton";
 import { ColorPicker } from "./ColorPicker";
@@ -37,6 +38,8 @@ export function Canvas() {
 
   const colorPickerStore = useColorPickerStore((state) => state);
   const { onClose } = colorPickerStore;
+
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -115,6 +118,31 @@ export function Canvas() {
     setSaved(false);
   }, [canvasRef, setSketch, setSketchBlob, setSaved]);
 
+  const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      clear();
+      const img = new Image();
+      img.src = reader.result as string;
+      img.onload = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const context = canvas.getContext("2d", { willReadFrequently: true });
+        if (!context) return;
+
+        context.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const dataURL = canvas.toDataURL(file.type);
+        setSketch(dataURL);
+      };
+    };
+  };
+
   return (
     <div>
       <canvas
@@ -129,12 +157,13 @@ export function Canvas() {
         <ColorPicker setColor={setColor} color={color} />
         <div>
           <IconButton
-            className="mx-2"
+            className="mr-2"
             icon={<ArrowUturnLeftIcon />}
             onClick={undo}
             disabled={!undoHistory.length}
           />
           <IconButton
+            className="mr-2"
             icon={<ArrowUturnRightIcon />}
             onClick={redo}
             disabled={
@@ -142,11 +171,22 @@ export function Canvas() {
               !redoHistory.length
             }
           />
+          <IconButton className="mr-2" icon={<TrashIcon />} onClick={clear} />
           <IconButton
-            className="mx-2"
-            icon={<TrashIcon />}
-            onClick={clear}
-            disabled={!undoHistory.length}
+            className="mr-2"
+            icon={<ArrowUpOnSquareStackIcon />}
+            onClick={() => {
+              if (inputRef.current) {
+                inputRef.current.click();
+              }
+            }}
+          />
+          <input
+            className="hidden"
+            type="file"
+            accept="image/*"
+            onChange={handleUpload}
+            ref={inputRef}
           />
           <IconButton
             icon={<ArrowDownTrayIcon />}
