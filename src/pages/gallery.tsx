@@ -143,6 +143,7 @@ export default function GalleryPage({
                 className="max-h-[500px] w-full max-w-[500] rounded-2xl border border-slate-900 shadow-card"
                 width={500}
                 height={500}
+                priority={true}
               />
               <div className="mt-1 flex justify-end p-1">
                 <IconButton

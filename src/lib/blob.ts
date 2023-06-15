@@ -1,15 +1,18 @@
 export async function createBlob(
-  source: Response | HTMLCanvasElement
+  source: string | HTMLCanvasElement | Response
 ): Promise<Blob> {
   let blob;
-
-  if (source instanceof Response) {
-    blob = await source.blob();
+  if (typeof source === "string") {
+    const response = await fetch(source);
+    const buffer = await response.arrayBuffer();
+    blob = new Blob([buffer], { type: "image/png" });
   } else if (source instanceof HTMLCanvasElement) {
     blob = await new Promise((resolve) => source.toBlob(resolve));
+  } else if (source instanceof Response) {
+    blob = await source.blob();
   } else {
     throw new Error(
-      "Invalid argument. Expected a Response object or a canvas."
+      "Invalid argument. Expected a Response object, a canvas, a data/image URL."
     );
   }
   return blob as Blob;
@@ -71,7 +74,7 @@ export async function downloadImage(imageUrl: string): Promise<void> {
     });
 
     if (!response.ok) {
-      throw new Error("Network response was not ok");
+      throw new Error("Unexpected error occurred during download.");
     }
 
     const blob = await createBlob(response);

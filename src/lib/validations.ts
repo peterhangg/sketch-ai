@@ -13,6 +13,7 @@ export const generateSchema = z.object({
 
 export const uploadSchema = z.object({
   sketchData: z.string(),
+  imageModel: z.string(),
 });
 
 export const deleteSchema = z.object({
