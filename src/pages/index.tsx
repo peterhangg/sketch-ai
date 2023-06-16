@@ -8,6 +8,7 @@ import {
   StarIcon,
 } from "@heroicons/react/24/solid";
 import { useDrawStore } from "@/state/drawStore";
+import { useSaveStore } from "@/state/saveStore";
 import { Canvas } from "@/components/Canvas";
 import { PromptForm } from "@/components/PromptForm";
 import { Spinner } from "@/components/ui/Spinner";
@@ -27,21 +28,20 @@ interface HomeProps {
 }
 
 export default function Home({ user }: HomeProps) {
+  const { sketch, generatedImage, submitted, loading, reset, generateError } =
+    useDrawStore((state) => state);
   const {
-    sketch,
-    generatedImage,
-    submitted,
-    loading,
-    reset,
-    generateError,
-    saved,
-    setSaved,
-  } = useDrawStore((state) => state);
-  const [aiImageSaved, setAiImageSaved] = React.useState(false);
+    saveSketch,
+    setSaveSketch,
+    saveAiImage,
+    setSaveAiImage,
+    reset: resetSave,
+  } = useSaveStore((state) => state);
 
-  const backHandler = React.useCallback((): void => {
+  const resetHandler = React.useCallback((): void => {
     reset();
-  }, [reset]);
+    resetSave();
+  }, [reset, resetSave]);
 
   const saveHandler = React.useCallback(
     async (imageSrc: string, imageModel: ImageModel) => {
@@ -53,8 +53,8 @@ export default function Home({ user }: HomeProps) {
         return;
       }
 
-      if (imageModel === SKETCH && saved) return;
-      if (imageModel === AI_IMAGE && aiImageSaved) return;
+      if (imageModel === SKETCH && saveSketch) return;
+      if (imageModel === AI_IMAGE && saveAiImage) return;
 
       const imageBlob = await createBlob(imageSrc);
       const sketchBase64Data = await blobToBase64(imageBlob as Blob);
@@ -80,19 +80,19 @@ export default function Home({ user }: HomeProps) {
           return;
         }
         if (imageModel === SKETCH) {
-          setSaved(true);
+          setSaveSketch(true);
           displayToast("Sketch was saved.", ToastVariant.SUCCESS);
         }
 
         if (imageModel === AI_IMAGE) {
-          setAiImageSaved(true);
+          setSaveAiImage(true);
           displayToast("AI Image was saved.", ToastVariant.SUCCESS);
         }
       } catch (error) {
         console.error(error);
       }
     },
-    [user, setSaved, saved, aiImageSaved]
+    [user, setSaveSketch, saveSketch, saveAiImage, setSaveAiImage]
   );
 
   return (
@@ -174,10 +174,12 @@ export default function Home({ user }: HomeProps) {
                     />
                     <IconButton
                       icon={
-                        <StarIcon className={saved ? "fill-yellow-500" : ""} />
+                        <StarIcon
+                          className={saveSketch ? "fill-yellow-500" : ""}
+                        />
                       }
                       onClick={() => saveHandler(sketch, SKETCH)}
-                      disabled={saved}
+                      disabled={saveSketch}
                     />
                   </div>
                 </motion.div>
@@ -212,11 +214,11 @@ export default function Home({ user }: HomeProps) {
                     <IconButton
                       icon={
                         <StarIcon
-                          className={aiImageSaved ? "fill-yellow-500" : ""}
+                          className={saveAiImage ? "fill-yellow-500" : ""}
                         />
                       }
                       onClick={() => saveHandler(generatedImage, AI_IMAGE)}
-                      disabled={aiImageSaved}
+                      disabled={saveAiImage}
                     />
                   </div>
                 </motion.div>
@@ -266,7 +268,7 @@ export default function Home({ user }: HomeProps) {
             >
               <Button
                 className={cn(buttonStyles({}))}
-                onClick={backHandler}
+                onClick={resetHandler}
                 disabled={loading}
               >
                 {loading ? (
