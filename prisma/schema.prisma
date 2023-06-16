@@ -45,6 +45,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   sketches      Sketch[]
+  aiImages      AiImage[]
 }
 
 model VerificationToken {
@@ -61,4 +62,12 @@ model Sketch {
   url        String
   createdAt  DateTime @default(now())
   user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AiImage {
+  id          String   @id @default(cuid())
+  userId      String
+  url         String
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

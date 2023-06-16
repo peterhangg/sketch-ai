@@ -8,6 +8,7 @@ import { deleteFile, getFileUploadUrl } from "@/lib/s3";
 import { ImageFileExtension } from "@/lib/types";
 import { parseForm } from "@/lib/form-parse";
 import { DefaultNextApiHandler } from "@/lib/server/DefaultNextApiHandler";
+import { AI_IMAGE, SKETCH } from "@/lib/constants";
 
 export const config = {
   api: {
@@ -24,23 +25,39 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   const userId = session.user.id;
 
   if (req.method == "POST") {
-    const userSketchCount = await prisma.sketch.count({
-      where: {
-        userId,
-      },
-    });
+    const { fields } = await parseForm(req);
+    const { sketchData, imageModel } = uploadSchema.parse(fields);
 
-    if (userSketchCount >= 18) {
-      throw new Error(
-        "Exceeded the maximum number of saved sketches (18). You can delete old sketches."
-      );
+    if (imageModel === SKETCH) {
+      const userSketchCount = await prisma.sketch.count({
+        where: {
+          userId,
+        },
+      });
+
+      if (userSketchCount >= 18) {
+        throw new Error(
+          "Exceeded the maximum number of saved sketches (18). You can delete old sketches."
+        );
+      }
     }
 
-    const { fields } = await parseForm(req);
-    const { sketchData } = uploadSchema.parse(fields);
+    if (imageModel === AI_IMAGE) {
+      const userAiImageCount = await prisma.aiImage.count({
+        where: {
+          userId,
+        },
+      });
+
+      if (userAiImageCount >= 18) {
+        throw new Error(
+          "Exceeded the maximum number of saved AI Images (18). You can delete old AI Images."
+        );
+      }
+    }
+
     const sketchBuffer = Buffer.from(sketchData as string, "base64");
     const contentLength = Buffer.byteLength(sketchBuffer);
-
     const filename = uuidv4();
     const key = `${S3Config.s3.defaultFolder}/${filename}${ImageFileExtension.PNG}`;
 
@@ -64,39 +81,51 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const s3FileUrl = `${S3Config.s3.baseObjectUrl}/${key}`;
 
-    await prisma.sketch.create({
-      data: {
-        userId,
-        url: s3FileUrl,
-      },
-    });
-    return { message: "Image saved and uploaded." };
-  }
-
-  if (req.method === "DELETE") {
-    const { sketchUrl } = deleteSchema.parse(req.query);
-    const fileKey = new URL(sketchUrl).pathname.substring(1);
-
-    const deleteFromS3 = await deleteFile(fileKey);
-    if (!deleteFromS3) {
-      throw new Error("Error deleting file on S3 bucket.");
-    }
-
-    const sketch = await prisma.sketch.findFirst({
-      where: {
-        userId,
-        url: sketchUrl,
-      },
-    });
-    if (sketch) {
-      await prisma.sketch.delete({
-        where: {
-          id: sketch.id,
+    if (imageModel === SKETCH) {
+      await prisma.sketch.create({
+        data: {
+          userId,
+          url: s3FileUrl,
         },
       });
     }
 
-    return { message: "Sketch was deleted." };
+    if (imageModel === AI_IMAGE) {
+      await prisma.aiImage.create({
+        data: {
+          userId,
+          url: s3FileUrl,
+        },
+      });
+    }
+    return { message: "Image saved and uploaded." };
+  }
+
+  if (req.method === "DELETE") {
+    const { imageUrl, imageModel } = deleteSchema.parse(req.query);
+    const fileKey = new URL(imageUrl).pathname.substring(1);
+    const deleteFromS3 = await deleteFile(fileKey);
+
+    if (!deleteFromS3) {
+      throw new Error("Error deleting file on S3 bucket.");
+    }
+
+    const prismaModel = imageModel === SKETCH ? prisma.sketch : prisma.aiImage;
+    const imageData = await prismaModel.findFirst({
+      where: { userId, url: imageUrl },
+    });
+
+    if (!imageData) {
+      throw new Error(
+        `${imageModel === SKETCH ? "Sketch" : "AI image"} does not exist.`
+      );
+    }
+
+    await prismaModel.delete({ where: { id: imageData.id } });
+
+    return {
+      message: `${imageModel === SKETCH ? "Sketch" : "AI image"} was deleted.`,
+    };
   }
 }
 

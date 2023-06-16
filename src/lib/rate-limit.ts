@@ -31,7 +31,7 @@ class Ratelimiter {
     if (!this.ratelimit) {
       return {
         success: false,
-        message: "Something went wrong on rate limiter",
+        message: "Unexpected error on rate limiter. Please contact admin.",
       };
     }
 

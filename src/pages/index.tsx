@@ -14,12 +14,14 @@ import { Spinner } from "@/components/ui/Spinner";
 import { Button, buttonStyles } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
 import { displayToast, ToastVariant } from "@/components/ui/Toast";
-import { blobToBase64, downloadImage } from "@/lib/blob";
+import { blobToBase64, createBlob, downloadImage } from "@/lib/blob";
 import { getServerAuthSession } from "@/lib/auth";
 import { User } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { SKETCH, AI_IMAGE } from "@/lib/constants";
 import ErrorPlaceholder from "../../public/error.png";
 
+type ImageModel = "sketch" | "ai-image";
 interface HomeProps {
   user: User | null;
 }
@@ -31,50 +33,67 @@ export default function Home({ user }: HomeProps) {
     submitted,
     loading,
     reset,
-    sketchBlob,
     generateError,
     saved,
     setSaved,
   } = useDrawStore((state) => state);
+  const [aiImageSaved, setAiImageSaved] = React.useState(false);
 
   const backHandler = React.useCallback((): void => {
     reset();
   }, [reset]);
 
-  const saveHandler = React.useCallback(async () => {
-    if (!user) {
-      displayToast("Must log in to save sketch", ToastVariant.WARNING);
-      return;
-    }
-
-    if (saved) return;
-
-    const sketchBase64Data = await blobToBase64(sketchBlob as Blob);
-    if (!sketchBase64Data) return;
-
-    const formData = new FormData();
-    formData.append("sketchData", sketchBase64Data);
-
-    try {
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
+  const saveHandler = React.useCallback(
+    async (imageSrc: string, imageModel: ImageModel) => {
+      if (!user) {
         displayToast(
-          data?.message || "Failed to save sketch. Please contact admin.",
-          ToastVariant.ERROR
+          "Must log in to save sketch or image",
+          ToastVariant.WARNING
         );
         return;
       }
-      setSaved(true);
-      displayToast("Sketch was saved", ToastVariant.SUCCESS);
-    } catch (error) {
-      console.error(error);
-    }
-  }, [user, sketchBlob, saved, setSaved]);
+
+      if (imageModel === SKETCH && saved) return;
+      if (imageModel === AI_IMAGE && aiImageSaved) return;
+
+      const imageBlob = await createBlob(imageSrc);
+      const sketchBase64Data = await blobToBase64(imageBlob as Blob);
+      if (!sketchBase64Data) return;
+
+      const formData = new FormData();
+      formData.append("sketchData", sketchBase64Data);
+      formData.append("imageModel", imageModel);
+
+      try {
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          displayToast(
+            data?.message ||
+              "Failed to save sketch/image. Please contact admin.",
+            ToastVariant.ERROR
+          );
+          return;
+        }
+        if (imageModel === SKETCH) {
+          setSaved(true);
+          displayToast("Sketch was saved.", ToastVariant.SUCCESS);
+        }
+
+        if (imageModel === AI_IMAGE) {
+          setAiImageSaved(true);
+          displayToast("AI Image was saved.", ToastVariant.SUCCESS);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    [user, setSaved, saved, aiImageSaved]
+  );
 
   return (
     <>
@@ -149,10 +168,15 @@ export default function Home({ user }: HomeProps) {
                   />
                   <div className="flex justify-end p-1">
                     <IconButton
+                      className="mr-2"
+                      icon={<ArrowDownTrayIcon />}
+                      onClick={() => downloadImage(sketch)}
+                    />
+                    <IconButton
                       icon={
                         <StarIcon className={saved ? "fill-yellow-500" : ""} />
                       }
-                      onClick={saveHandler}
+                      onClick={() => saveHandler(sketch, SKETCH)}
                       disabled={saved}
                     />
                   </div>
@@ -181,8 +205,18 @@ export default function Home({ user }: HomeProps) {
                   />
                   <div className="flex justify-end p-1">
                     <IconButton
+                      className="mr-2"
                       icon={<ArrowDownTrayIcon />}
                       onClick={() => downloadImage(generatedImage)}
+                    />
+                    <IconButton
+                      icon={
+                        <StarIcon
+                          className={aiImageSaved ? "fill-yellow-500" : ""}
+                        />
+                      }
+                      onClick={() => saveHandler(generatedImage, AI_IMAGE)}
+                      disabled={aiImageSaved}
                     />
                   </div>
                 </motion.div>

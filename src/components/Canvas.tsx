@@ -45,7 +45,7 @@ export function Canvas() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const context = canvas.getContext("2d");
+    const context = canvas.getContext("2d", { willReadFrequently: true });
     if (!context) return;
 
     const setBlobFromSrc = async () => {
