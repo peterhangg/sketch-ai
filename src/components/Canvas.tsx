@@ -10,6 +10,7 @@ import { IconButton } from "./ui/IconButton";
 import { ColorPicker } from "./ColorPicker";
 import { useOnDraw } from "@/hooks/useOnDraw";
 import { useDrawStore } from "@/state/drawStore";
+import { useSaveStore } from "@/state/saveStore";
 import useColorPickerStore from "@/state/colorPickerStore";
 import { createBlob, createDownload } from "@/lib/blob";
 import { WHITE } from "@/lib/constants";
@@ -21,8 +22,8 @@ export function Canvas() {
     setSketchBlob,
     srcFromGallery,
     setSrcFromGallery,
-    setSaved,
   } = useDrawStore((state) => state);
+  const { setSaveSketch } = useSaveStore((state) => state);
 
   const {
     canvasRef,
@@ -64,7 +65,7 @@ export function Canvas() {
         setBlobFromSrc();
       };
       setSrcFromGallery(false);
-      setSaved(true);
+      setSaveSketch(true);
     }
   }, [
     canvasRef,
@@ -72,7 +73,7 @@ export function Canvas() {
     srcFromGallery,
     setSrcFromGallery,
     setSketchBlob,
-    setSaved,
+    setSaveSketch,
   ]);
 
   const handleMouseDown = React.useCallback(() => {
@@ -115,8 +116,8 @@ export function Canvas() {
 
     const blobUrl = URL.createObjectURL(blob);
     setSketch(blobUrl);
-    setSaved(false);
-  }, [canvasRef, setSketch, setSketchBlob, setSaved]);
+    setSaveSketch(false);
+  }, [canvasRef, setSketch, setSketchBlob, setSaveSketch]);
 
   const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
