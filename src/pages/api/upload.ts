@@ -102,29 +102,30 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   if (req.method === "DELETE") {
-    const { sketchUrl } = deleteSchema.parse(req.query);
-    const fileKey = new URL(sketchUrl).pathname.substring(1);
-
+    const { imageUrl, imageModel } = deleteSchema.parse(req.query);
+    const fileKey = new URL(imageUrl).pathname.substring(1);
     const deleteFromS3 = await deleteFile(fileKey);
+
     if (!deleteFromS3) {
       throw new Error("Error deleting file on S3 bucket.");
     }
 
-    const sketch = await prisma.sketch.findFirst({
-      where: { userId, url: sketchUrl },
-    });
-    const aiImage = await prisma.aiImage.findFirst({
-      where: { userId, url: sketchUrl },
+    const prismaModel = imageModel === SKETCH ? prisma.sketch : prisma.aiImage;
+    const imageData = await prismaModel.findFirst({
+      where: { userId, url: imageUrl },
     });
 
-    if (sketch || aiImage) {
-      const model = sketch ? prisma.sketch : prisma.aiImage;
-      const id = sketch ? sketch.id : aiImage?.id;
-      await model.delete({ where: { id } });
-
-      return { message: `${sketch ? "Sketch" : "AI image"} was deleted.` };
+    if (!imageData) {
+      throw new Error(
+        `${imageModel === SKETCH ? "Sketch" : "AI image"} does not exist.`
+      );
     }
-    throw new Error("Sketch/image does not exist.");
+
+    await prismaModel.delete({ where: { id: imageData.id } });
+
+    return {
+      message: `${imageModel === SKETCH ? "Sketch" : "AI image"} was deleted.`,
+    };
   }
 }
 

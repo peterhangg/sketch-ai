@@ -33,7 +33,6 @@ export default function Home({ user }: HomeProps) {
     submitted,
     loading,
     reset,
-    sketchBlob,
     generateError,
     saved,
     setSaved,

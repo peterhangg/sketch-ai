@@ -11,11 +11,21 @@ export const generateSchema = z.object({
   prompt: z.string().min(1),
 });
 
+export const getPredictionSchema = z.object({
+  id: z.string(),
+});
+
+export const getImagesSchema = z.object({
+  cursor: z.string().optional(),
+  imageModel: z.string(),
+});
+
 export const uploadSchema = z.object({
   sketchData: z.string(),
   imageModel: z.string(),
 });
 
 export const deleteSchema = z.object({
-  sketchUrl: z.string(),
+  imageUrl: z.string(),
+  imageModel: z.string(),
 });

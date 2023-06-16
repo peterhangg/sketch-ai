@@ -1,54 +1,78 @@
 import React from "react";
 import { GetServerSidePropsContext } from "next";
-import Image from "next/image";
 import { useRouter } from "next/router";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { getServerAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isValidUrl } from "@/lib/utils";
-import { Sketch, User } from "@prisma/client";
-import { IconButton } from "@/components/ui/IconButton";
-import {
-  TrashIcon,
-  PencilIcon,
-  ArrowDownTrayIcon,
-} from "@heroicons/react/24/solid";
+import { AiImage, Sketch, User } from "@prisma/client";
+import { GalleryCard } from "@/components/GalleryCard";
 import { displayToast, ToastVariant } from "@/components/ui/Toast";
+import { Toggle } from "@/components/ui/Toggle";
 import { useIntersection } from "@/hooks/useIntersection";
 import { useDrawStore } from "@/state/drawStore";
-import { SOMETHING_WENT_WRONG } from "@/lib/constants";
-import { downloadImage } from "@/lib/blob";
+import { AI_IMAGE, SKETCH, SOMETHING_WENT_WRONG } from "@/lib/constants";
 
 interface GalleryPageProps {
   user: User;
   initialSketches: Sketch[];
-  hasMore: boolean;
-  cursor: string | null;
+  initialAiImages: AiImage[];
+  hasMoreSketches: boolean;
+  hasMoreAiImages: boolean;
+  cursorForSketches: string | null;
+  cursorForAiImages: string | null;
 }
 
 export default function GalleryPage({
   user,
   initialSketches,
-  hasMore,
-  cursor,
+  initialAiImages,
+  hasMoreSketches,
+  hasMoreAiImages,
+  cursorForSketches,
+  cursorForAiImages,
 }: GalleryPageProps) {
   const [sketchList, setSketchList] = React.useState<Sketch[]>(initialSketches);
+  const [aiImageList, setAiImageList] =
+    React.useState<Sketch[]>(initialAiImages);
   const [loading, setLoading] = React.useState<boolean>(false);
   const [_error, setError] = React.useState<string | null>(null);
-  const [hasMoreData, setHasMoreData] = React.useState<boolean>(hasMore);
-  const [nextCursor, setNextCursor] = React.useState<string | null>(cursor);
+  const [hasMoreDataForSketches, setHasMoreDataForSketches] =
+    React.useState<boolean>(hasMoreSketches);
+  const [hasMoreDataForAiImages, setHasMoreDataForAiImages] =
+    React.useState<boolean>(hasMoreAiImages);
+  const [nextCursorForSketches, setNextCursorForSketches] = React.useState<
+    string | null
+  >(cursorForSketches);
+  const [nextCursorForAiImages, setNextCursorForAiImages] = React.useState<
+    string | null
+  >(cursorForAiImages);
+  const [showAiModel, setShowAiModel] = React.useState<boolean>(false);
   const { setSketch, setSrcFromGallery, reset } = useDrawStore(
     (state) => state
   );
   const intersectionRef = React.useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  const sketchesHandler = React.useCallback(async () => {
-    if (!nextCursor || loading || !hasMoreData) return;
+  const getImagesHandler = React.useCallback(async () => {
+    let imageModel = SKETCH;
+    let cursor = nextCursorForSketches as string | null;
+    let hasMoreData = hasMoreDataForSketches as boolean | null;
+
+    if (showAiModel) {
+      imageModel = AI_IMAGE;
+      cursor = nextCursorForAiImages;
+      hasMoreData = hasMoreDataForAiImages;
+    }
+
+    if (!cursor || loading || !hasMoreData) return;
+
     setLoading(true);
 
     try {
-      const response = await fetch(`/api/sketches?cursor=${nextCursor}`);
+      const response = await fetch(
+        `/api/images?cursor=${cursor}&imageModel=${imageModel}`
+      );
       const data = await response.json();
 
       if (!response.ok) {
@@ -57,28 +81,46 @@ export default function GalleryPage({
         return;
       }
 
-      setSketchList((prev) => [...prev, ...data.sketches]);
-      setNextCursor(data.cursor);
-      setHasMoreData(data.hasMore);
+      if (showAiModel) {
+        setAiImageList((prev) => [...prev, ...data.images]);
+        setNextCursorForAiImages(data.cursor);
+        setHasMoreDataForAiImages(data.hasMore);
+      } else {
+        setSketchList((prev) => [...prev, ...data.images]);
+        setNextCursorForSketches(data.cursor);
+        setHasMoreDataForSketches(data.hasMore);
+      }
     } catch (error) {
       console.error(error);
     } finally {
       setLoading(false);
     }
-  }, [loading, nextCursor, hasMoreData]);
+  }, [
+    loading,
+    showAiModel,
+    nextCursorForSketches,
+    nextCursorForAiImages,
+    hasMoreDataForSketches,
+    hasMoreDataForAiImages,
+  ]);
 
   const deleteHandler = React.useCallback(
-    async (sketchUrl: string) => {
-      if (!user || !sketchUrl) return;
+    async (imageUrl: string) => {
+      if (!user || !imageUrl) return;
 
-      const validateUrl = isValidUrl(sketchUrl);
+      const validateUrl = isValidUrl(imageUrl);
       if (!validateUrl) return;
+
+      const imageModel = showAiModel ? AI_IMAGE : SKETCH;
 
       try {
         setError(null);
-        const response = await fetch(`/api/upload?sketchUrl=${sketchUrl}`, {
-          method: "DELETE",
-        });
+        const response = await fetch(
+          `/api/upload?imageUrl=${imageUrl}&imageModel=${imageModel}`,
+          {
+            method: "DELETE",
+          }
+        );
         const data = await response.json();
 
         if (!response.ok) {
@@ -90,20 +132,25 @@ export default function GalleryPage({
           return;
         }
 
-        const updatedSketches = sketchList.filter(
-          (sketch) => sketch.url !== sketchUrl
-        );
-        setSketchList(updatedSketches);
-
-        displayToast("Sketch successfully deleted", ToastVariant.SUCCESS);
+        if (showAiModel) {
+          const updatedAiImages = aiImageList.filter(
+            (aiImage) => aiImage.url !== imageUrl
+          );
+          setAiImageList(updatedAiImages);
+          displayToast("AI image successfully deleted", ToastVariant.SUCCESS);
+        } else {
+          const updatedSketches = sketchList.filter(
+            (sketch) => sketch.url !== imageUrl
+          );
+          setSketchList(updatedSketches);
+          displayToast("Sketch successfully deleted", ToastVariant.SUCCESS);
+        }
       } catch (error) {
         console.error(error);
       }
     },
-    [sketchList, user]
+    [user, sketchList, aiImageList, showAiModel]
   );
-
-  useIntersection({ targetRef: intersectionRef, callback: sketchesHandler });
 
   const setSketchHandler = React.useCallback(
     (sketchUrl: string) => {
@@ -117,52 +164,36 @@ export default function GalleryPage({
     [user, router, setSketch, reset, setSrcFromGallery]
   );
 
+  useIntersection({ targetRef: intersectionRef, callback: getImagesHandler });
+
   return (
     <div className="flex flex-1 flex-col items-center justify-center">
-      <h1 className="mt-4 text-2xl font-semibold tracking-tighter">
-        Sketch Gallery
-      </h1>
+      <h1 className="mt-4 text-2xl font-semibold tracking-tighter">Gallery</h1>
+      <Toggle
+        showAiModel={showAiModel}
+        setShowAiModel={() => setShowAiModel((prev) => !prev)}
+      />
       <div className="container my-2 grid flex-1 grid-cols-1 gap-3 p-2 md:grid-cols-2 lg:grid-cols-3">
         <AnimatePresence>
-          {sketchList.map((sketch) => (
-            <motion.div
-              key={sketch.id}
-              className="mt-3 flex flex-col p-2"
-              initial="hidden"
-              animate="visible"
-              exit="hidden"
-              variants={{
-                hidden: { opacity: 0, y: 0 },
-                visible: { opacity: 1, y: 0 },
-              }}
-              transition={{ delay: 0.1, duration: 0.5 }}
-            >
-              <Image
-                alt="sketch image"
-                src={sketch.url}
-                className="max-h-[500px] w-full max-w-[500] rounded-2xl border border-slate-900 shadow-card"
-                width={500}
-                height={500}
-                priority={true}
-              />
-              <div className="mt-1 flex justify-end p-1">
-                <IconButton
-                  icon={<PencilIcon />}
-                  onClick={() => setSketchHandler(sketch.url)}
-                  className="mr-2"
+          {showAiModel
+            ? aiImageList.map((aiImage) => (
+                <GalleryCard
+                  key={aiImage.id}
+                  image={aiImage}
+                  imageModel={AI_IMAGE}
+                  setImageHandler={setSketchHandler}
+                  deleteHandler={deleteHandler}
                 />
-                <IconButton
-                  icon={<TrashIcon />}
-                  onClick={() => deleteHandler(sketch.url)}
-                  className="mr-2"
+              ))
+            : sketchList.map((sketch) => (
+                <GalleryCard
+                  key={sketch.id}
+                  image={sketch}
+                  imageModel={SKETCH}
+                  setImageHandler={setSketchHandler}
+                  deleteHandler={deleteHandler}
                 />
-                <IconButton
-                  icon={<ArrowDownTrayIcon />}
-                  onClick={() => downloadImage(sketch.url)}
-                />
-              </div>
-            </motion.div>
-          ))}
+              ))}
         </AnimatePresence>
         <div ref={intersectionRef}></div>
       </div>
@@ -173,13 +204,14 @@ export default function GalleryPage({
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const session = await getServerAuthSession(ctx);
   const userId = session?.user.id;
+
   const sketches = await prisma.sketch.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
     take: 6,
   });
-  const hasMore = sketches.length === 6;
-  const cursor = hasMore
+  const hasMoreSketches = sketches.length === 6;
+  const cursorForSketches = hasMoreSketches
     ? sketches[sketches.length - 1].createdAt.toISOString()
     : null;
   const formattedSketches = sketches.map((sketch) => ({
@@ -187,12 +219,29 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     createdAt: sketch.createdAt.toISOString(),
   }));
 
+  const aiImages = await prisma.aiImage.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    take: 6,
+  });
+  const hasMoreAiImages = aiImages.length === 6;
+  const cursorForAiImages = hasMoreAiImages
+    ? aiImages[aiImages.length - 1].createdAt.toISOString()
+    : null;
+  const formattedAiImages = aiImages.map((aiImage) => ({
+    ...aiImage,
+    createdAt: aiImage.createdAt.toISOString(),
+  }));
+
   return {
     props: {
       user: session?.user || null,
       initialSketches: formattedSketches,
-      hasMore,
-      cursor,
+      initialAiImages: formattedAiImages,
+      hasMoreSketches,
+      cursorForSketches,
+      hasMoreAiImages,
+      cursorForAiImages,
     },
   };
 }

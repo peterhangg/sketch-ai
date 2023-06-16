@@ -1,15 +1,21 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getServerAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Sketch } from "@prisma/client";
+import { AiImage, Sketch } from "@prisma/client";
 import { DefaultNextApiHandler } from "@/lib/server/DefaultNextApiHandler";
+import { getImagesSchema } from "@/lib/validations";
+import { SKETCH } from "@/lib/constants";
 
 interface FormattedSketch extends Omit<Sketch, "createdAt"> {
   createdAt: string;
 }
 
+interface FormattedAiImage extends Omit<AiImage, "createdAt"> {
+  createdAt: string;
+}
+
 interface ResponseData {
-  sketches: FormattedSketch[];
+  images: FormattedSketch[] | FormattedAiImage[];
   hasMore: boolean;
   cursor: string | null;
 }
@@ -29,24 +35,29 @@ async function handler(
   const userId = session.user.id;
 
   if (req.method === "GET") {
-    let cursor;
+    const { cursor, imageModel } = getImagesSchema.parse(req.query);
+    let currentCursor;
 
-    if (req.query.cursor) {
-      let dateValue = req.query.cursor;
+    if (cursor) {
+      let dateValue = cursor;
       if (Array.isArray(dateValue)) {
         dateValue = dateValue[0];
       }
 
       const date = new Date(dateValue);
       if (isNaN(date.getTime())) {
-        throw new Error("Failed to fetch sketches. Please contact admin");
+        throw new Error("Failed to fetch images. Please contact admin");
       }
-      cursor = date;
+      currentCursor = date;
     }
 
-    const sketches = await prisma.sketch.findMany({
+    const prismaModel = imageModel === SKETCH ? prisma.sketch : prisma.aiImage;
+    const images = await prismaModel.findMany({
       where: {
-        AND: [{ userId }, cursor ? { createdAt: { lt: cursor } } : {}],
+        AND: [
+          { userId },
+          currentCursor ? { createdAt: { lt: currentCursor } } : {},
+        ],
       },
       orderBy: {
         createdAt: "desc",
@@ -54,18 +65,18 @@ async function handler(
       take: 6,
     });
 
-    const hasMore = sketches.length === 6;
+    const hasMore = images.length === 6;
     const nextCursor = hasMore
-      ? sketches[sketches.length - 1].createdAt.toISOString()
+      ? images[images.length - 1].createdAt.toISOString()
       : null;
 
-    const formattedSketches: FormattedSketch[] = sketches.map((sketch) => ({
-      ...sketch,
-      createdAt: sketch.createdAt.toISOString(),
+    const formattedImages: FormattedSketch[] = images.map((image) => ({
+      ...image,
+      createdAt: image.createdAt.toISOString(),
     }));
 
     const data: ResponseData = {
-      sketches: formattedSketches,
+      images: formattedImages,
       hasMore,
       cursor: nextCursor,
     };
