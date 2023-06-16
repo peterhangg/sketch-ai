@@ -16,7 +16,7 @@ interface ToastProps
   toastVisible: boolean;
   variant: ToastVariant;
   handler: () => void;
-  className?: string;
+  className?: React.HTMLAttributes<HTMLElement>["className"];
 }
 
 export enum ToastVariant {
@@ -47,7 +47,7 @@ const TOAST_DURATION = 2000;
 
 const getToastIcon = (
   variant: ToastVariant,
-  className?: string
+  className?: React.HTMLAttributes<HTMLElement>["className"]
 ): React.ReactElement => {
   switch (variant) {
     case ToastVariant.SUCCESS:

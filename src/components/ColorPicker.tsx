@@ -1,7 +1,8 @@
 import { BLACK, WHITE } from "@/lib/constants";
 import React from "react";
 import { IconButton } from "./ui/IconButton";
-import useColorPickerStore from "@/state/colorPickerStore";
+import useColorPickerStore from "@/store/colorPickerStore";
+import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 
 interface ColorPickerProps {
   setColor: (color: string) => void;
@@ -25,14 +26,18 @@ const colorPalette = [
 
 export const ColorPicker = ({ setColor, color }: ColorPickerProps) => {
   const { isOpen, toggleOpen, onClose } = useColorPickerStore((state) => state);
+  const colorRef = React.useRef<HTMLDivElement | null>(null);
 
   const handleColorSelected = (newColor: string) => {
-    onClose();
     setColor(newColor);
   };
 
+  useOnClickOutside(colorRef, () => {
+    onClose();
+  });
+
   return (
-    <div className="relative p-2">
+    <div ref={colorRef} className="relative p-2">
       <IconButton
         icon={
           <svg

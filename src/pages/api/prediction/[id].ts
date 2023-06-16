@@ -4,15 +4,8 @@ import { config } from "../../../../config";
 import { Replicate } from "@/lib/types";
 import { getPredictionSchema } from "@/lib/validations";
 
-interface ReplicateApiRequest extends NextApiRequest {
-  body: {
-    imageUrl: string;
-    prompt: string;
-  };
-}
-
 async function handler(
-  req: ReplicateApiRequest,
+  req: NextApiRequest,
   _res: NextApiResponse<Replicate | { message: string }>
 ) {
   if (req.method === "GET") {

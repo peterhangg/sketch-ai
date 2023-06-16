@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   children: React.ReactNode;
-  className?: string;
+  className?: React.HTMLAttributes<HTMLElement>["className"];
 };
 
 export function Container({ className, children }: Props) {

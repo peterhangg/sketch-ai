@@ -7,7 +7,6 @@ export const useOnDraw = () => {
   const [undoHistory, setUndoHistory] = React.useState<ImageData[]>([]);
   const [redoHistory, setRedoHistory] = React.useState<ImageData[]>([]);
   const [color, setColor] = React.useState<string>(BLACK);
-
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const prevPoint = React.useRef<Point | null>(null);
   const mouseDownRef = React.useRef<boolean>(false);
@@ -22,7 +21,7 @@ export const useOnDraw = () => {
 
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     setUndoHistory((prev) => [...prev, imageData]);
-    // Clear redo stack on new draw action (user hits undo and draws afterwards)
+    // Clear redo stack on new draw action (ex: user hits undo and draws afterwards)
     setRedoHistory([]);
   }, []);
 
@@ -41,7 +40,6 @@ export const useOnDraw = () => {
     setUndoHistory((prevUndoHistory) => [...prevUndoHistory, currImageData]);
     setRedoHistory([]);
 
-    // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }, []);
 

@@ -7,29 +7,36 @@ import {
   ChevronLeftIcon,
   StarIcon,
 } from "@heroicons/react/24/solid";
-import { useDrawStore } from "@/state/drawStore";
-import { useSaveStore } from "@/state/saveStore";
+import { useDrawStore } from "@/store/drawStore";
+import { useSaveStore } from "@/store/saveStore";
 import { Canvas } from "@/components/Canvas";
 import { PromptForm } from "@/components/PromptForm";
 import { Spinner } from "@/components/ui/Spinner";
 import { Button, buttonStyles } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
 import { displayToast, ToastVariant } from "@/components/ui/Toast";
+import { LoaderOverlay } from "@/components/ui/LoaderOverlay";
 import { blobToBase64, createBlob, downloadImage } from "@/lib/blob";
 import { getServerAuthSession } from "@/lib/auth";
-import { User } from "@/lib/types";
+import { ImageModel, User } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { SKETCH, AI_IMAGE } from "@/lib/constants";
 import ErrorPlaceholder from "../../public/error.png";
 
-type ImageModel = "sketch" | "ai-image";
 interface HomeProps {
   user: User | null;
 }
 
 export default function Home({ user }: HomeProps) {
-  const { sketch, generatedImage, submitted, loading, reset, generateError } =
-    useDrawStore((state) => state);
+  const {
+    sketch,
+    generatedImage,
+    submitted,
+    loading,
+    prompt,
+    reset,
+    generateError,
+  } = useDrawStore((state) => state);
   const {
     saveSketch,
     setSaveSketch,
@@ -37,6 +44,10 @@ export default function Home({ user }: HomeProps) {
     setSaveAiImage,
     reset: resetSave,
   } = useSaveStore((state) => state);
+  const [saveLoading, setSaveLoading] = React.useState<boolean>(false);
+  const [imageModelType, setImageModelType] = React.useState<ImageModel | null>(
+    null
+  );
 
   const resetHandler = React.useCallback((): void => {
     reset();
@@ -64,6 +75,8 @@ export default function Home({ user }: HomeProps) {
       formData.append("sketchData", sketchBase64Data);
       formData.append("imageModel", imageModel);
 
+      setSaveLoading(true);
+      setImageModelType(imageModel);
       try {
         const response = await fetch("/api/upload", {
           method: "POST",
@@ -90,6 +103,9 @@ export default function Home({ user }: HomeProps) {
         }
       } catch (error) {
         console.error(error);
+      } finally {
+        setSaveLoading(false);
+        setImageModelType(null);
       }
     },
     [user, setSaveSketch, saveSketch, saveAiImage, setSaveAiImage]
@@ -132,9 +148,9 @@ export default function Home({ user }: HomeProps) {
           </>
         ) : (
           <AnimatePresence>
-            <motion.h1
+            <motion.div
               key="11"
-              className="mt-4 text-2xl font-semibold tracking-tighter md:mb-2"
+              className="flex max-w-[600px] flex-col items-center justify-center"
               whileInView="visible"
               viewport={{ once: true, amount: 0.5 }}
               transition={{ delay: 0.2, duration: 0.5 }}
@@ -143,8 +159,13 @@ export default function Home({ user }: HomeProps) {
                 visible: { opacity: 1, x: 0 },
               }}
             >
-              AI Generated Image Results
-            </motion.h1>
+              <h1 className="text-xl font-semibold tracking-tighter md:mb-0">
+                AI Generated Image Results
+              </h1>
+              <p className="text-md font-medium tracking-tighter text-gray-700">
+                {prompt}
+              </p>
+            </motion.div>
             <div className="container mt-4 flex flex-col items-center justify-center md:flex-row md:space-x-6">
               {sketch && (
                 <motion.div
@@ -159,13 +180,18 @@ export default function Home({ user }: HomeProps) {
                     visible: { opacity: 1, x: 0 },
                   }}
                 >
-                  <Image
-                    alt="sketch drawing"
-                    src={sketch}
-                    className="h-full max-h-[600px] rounded-2xl border border-slate-900 shadow-card"
-                    width={500}
-                    height={600}
-                  />
+                  <div className="relative h-full max-h-[600px]">
+                    <Image
+                      alt="sketch drawing"
+                      src={sketch}
+                      className="h-full max-h-[600px] rounded-2xl border border-slate-900 shadow-card"
+                      width={500}
+                      height={600}
+                    />
+                    {saveLoading && imageModelType === SKETCH && (
+                      <LoaderOverlay />
+                    )}
+                  </div>
                   <div className="flex justify-end p-1">
                     <IconButton
                       className="mr-2"
@@ -188,7 +214,7 @@ export default function Home({ user }: HomeProps) {
               {!loading && generatedImage && !generateError && (
                 <motion.div
                   key="33"
-                  className="mt-5 flex h-full flex-col md:mt-0"
+                  className="mt-4 flex h-full flex-col md:mt-0"
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true, amount: 0.5 }}
@@ -198,13 +224,18 @@ export default function Home({ user }: HomeProps) {
                     visible: { opacity: 1, x: 0 },
                   }}
                 >
-                  <Image
-                    alt="generated image"
-                    src={generatedImage}
-                    className="h-full max-h-[600px] rounded-2xl border border-slate-900 shadow-card"
-                    width={500}
-                    height={600}
-                  />
+                  <div className="relative h-full max-h-[600px]">
+                    <Image
+                      alt="generated image"
+                      src={generatedImage}
+                      className="h-full rounded-2xl border border-slate-900 shadow-card"
+                      width={500}
+                      height={600}
+                    />
+                    {saveLoading && imageModelType === AI_IMAGE && (
+                      <LoaderOverlay />
+                    )}
+                  </div>
                   <div className="flex justify-end p-1">
                     <IconButton
                       className="mr-2"

@@ -13,10 +13,20 @@ module.exports = {
           from: { opacity: 0, transform: "translateX(10px)" },
           to: { opacity: 1, transform: "none" },
         },
+        ripple: {
+          "0%": {
+            transform: "scale(0)",
+          },
+          "100%": {
+            transform: "scale(4)",
+            opacity: 0,
+          },
+        },
       },
       animation: {
         "fade-in-left":
           "fade-in-left 600ms var(--animation-delay, 0ms) cubic-bezier(.21,1.02,.73,1) forwards",
+        ripple: "ripple 1.5s infinite",
       },
       boxShadow: {
         card: "rgba(0, 0, 0, 0.35) 0px 5px 15px",

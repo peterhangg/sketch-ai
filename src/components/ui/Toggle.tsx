@@ -16,7 +16,7 @@ export function Toggle({
     <div className={cn("mt-1 flex items-center p-2", className)}>
       <span
         className={cn(
-          "font-small ml-3 mr-2 text-sm",
+          "ml-3 mr-2 text-sm font-semibold",
           showAiModel ? "text-gray-400" : "text-gray-900"
         )}
       >
@@ -34,7 +34,7 @@ export function Toggle({
       </label>
       <span
         className={cn(
-          "font-small ml-3 mr-2 text-sm",
+          "ml-3 mr-2 text-sm font-semibold",
           showAiModel ? "text-gray-900" : "text-gray-400"
         )}
       >

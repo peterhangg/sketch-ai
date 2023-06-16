@@ -14,6 +14,8 @@ export type User = DefaultSession["user"] & {
   id: string;
 };
 
+export type ImageModel = "sketch" | "ai-image";
+
 export enum ImageFileExtension {
   PNG = ".png",
   JPG = ".jpg",

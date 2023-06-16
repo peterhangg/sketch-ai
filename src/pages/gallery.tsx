@@ -10,7 +10,7 @@ import { GalleryCard } from "@/components/GalleryCard";
 import { displayToast, ToastVariant } from "@/components/ui/Toast";
 import { Toggle } from "@/components/ui/Toggle";
 import { useIntersection } from "@/hooks/useIntersection";
-import { useDrawStore } from "@/state/drawStore";
+import { useDrawStore } from "@/store/drawStore";
 import { AI_IMAGE, SKETCH, SOMETHING_WENT_WRONG } from "@/lib/constants";
 
 interface GalleryPageProps {

@@ -80,6 +80,7 @@ async function handler(
               "best quality, extremely detailed, ultra-detailed, ultra-realistic, cinematic photo",
             n_prompt:
               "longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality",
+            ddim_steps: 30,
           },
         }),
       }

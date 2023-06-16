@@ -9,9 +9,9 @@ import {
 import { IconButton } from "./ui/IconButton";
 import { ColorPicker } from "./ColorPicker";
 import { useOnDraw } from "@/hooks/useOnDraw";
-import { useDrawStore } from "@/state/drawStore";
-import { useSaveStore } from "@/state/saveStore";
-import useColorPickerStore from "@/state/colorPickerStore";
+import { useDrawStore } from "@/store/drawStore";
+import { useSaveStore } from "@/store/saveStore";
+import useColorPickerStore from "@/store/colorPickerStore";
 import { createBlob, createDownload } from "@/lib/blob";
 import { WHITE } from "@/lib/constants";
 
@@ -23,7 +23,7 @@ export function Canvas() {
     srcFromGallery,
     setSrcFromGallery,
   } = useDrawStore((state) => state);
-  const { setSaveSketch } = useSaveStore((state) => state);
+  const { setSaveSketch, setSaveAiImage } = useSaveStore((state) => state);
 
   const {
     canvasRef,
@@ -36,9 +36,6 @@ export function Canvas() {
     undoHistory,
     redoHistory,
   } = useOnDraw();
-
-  const colorPickerStore = useColorPickerStore((state) => state);
-  const { onClose } = colorPickerStore;
 
   const inputRef = React.useRef<HTMLInputElement | null>(null);
 
@@ -66,6 +63,7 @@ export function Canvas() {
       };
       setSrcFromGallery(false);
       setSaveSketch(true);
+      setSaveAiImage(false);
     }
   }, [
     canvasRef,
@@ -74,12 +72,12 @@ export function Canvas() {
     setSrcFromGallery,
     setSketchBlob,
     setSaveSketch,
+    setSaveAiImage,
   ]);
 
   const handleMouseDown = React.useCallback(() => {
-    onClose();
     onMouseDown();
-  }, [onClose, onMouseDown]);
+  }, [onMouseDown]);
 
   const downloadHandler = React.useCallback(
     async (chartRef: React.MutableRefObject<HTMLCanvasElement | null>) => {
@@ -94,7 +92,6 @@ export function Canvas() {
 
       ctx.fillStyle = WHITE;
       ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
-      // Draw the original canvas on the new canvas
       ctx.drawImage(chartRef.current, 0, 0);
 
       const blob = await createBlob(newCanvas);

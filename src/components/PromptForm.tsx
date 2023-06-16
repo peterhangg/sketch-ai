@@ -7,8 +7,7 @@ import { Input } from "./ui/Input";
 import { Button } from "./ui/Button";
 import { displayToast, ToastVariant } from "./ui/Toast";
 import { ErrorMessage } from "./ui/ErrorMessage";
-import { useDrawStore } from "@/state/drawStore";
-import useColorPickerStore from "@/state/colorPickerStore";
+import { useDrawStore } from "@/store/drawStore";
 import { promptSchema } from "@/lib/validations";
 import { blobUrlToDataURL } from "@/lib/blob";
 import { sleep } from "@/lib/utils";
@@ -26,7 +25,6 @@ export function PromptForm() {
     setSubmitted,
     setPrompt,
   } = useDrawStore((state) => state);
-  const { onClose } = useColorPickerStore((state) => state);
 
   const {
     handleSubmit,
@@ -149,7 +147,6 @@ export function PromptForm() {
           className="rounded-r-none"
           placeholder="Describe the image you want to create..."
           {...register("prompt")}
-          onClick={onClose}
         />
         <Button className="rounded-l-none" disabled={loading || !promptValue}>
           Submit
