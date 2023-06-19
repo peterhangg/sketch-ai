@@ -8,6 +8,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { AiImage, Sketch } from "@prisma/client";
 import { IconButton } from "./ui/IconButton";
+import { cn } from "@/lib/utils";
 import { downloadImage } from "@/lib/blob";
 import { SKETCH } from "@/lib/constants";
 
@@ -24,10 +25,12 @@ export function GalleryCard({
   deleteHandler,
   imageModel,
 }: GalleryCardProps) {
+  const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
+
   return (
     <motion.div
       key={image.id}
-      className="mt-3 flex flex-col p-2"
+      className={cn("mt-3 flex flex-col p-2", isDeleting && "animate-fade-out")}
       initial="hidden"
       animate="visible"
       exit="hidden"
@@ -55,7 +58,10 @@ export function GalleryCard({
         )}
         <IconButton
           icon={<TrashIcon />}
-          onClick={() => deleteHandler(image.url)}
+          onClick={() => {
+            setIsDeleting(true);
+            deleteHandler(image.url);
+          }}
           className="mr-2"
         />
         <IconButton

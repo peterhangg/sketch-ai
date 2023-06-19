@@ -11,7 +11,6 @@ import { ColorPicker } from "./ColorPicker";
 import { useOnDraw } from "@/hooks/useOnDraw";
 import { useDrawStore } from "@/store/drawStore";
 import { useSaveStore } from "@/store/saveStore";
-import useColorPickerStore from "@/store/colorPickerStore";
 import { createBlob, createDownload } from "@/lib/blob";
 import { WHITE } from "@/lib/constants";
 
@@ -79,30 +78,27 @@ export function Canvas() {
     onMouseDown();
   }, [onMouseDown]);
 
-  const downloadHandler = React.useCallback(
-    async (chartRef: React.MutableRefObject<HTMLCanvasElement | null>) => {
-      if (!chartRef.current) return;
+  const downloadHandler = React.useCallback(async () => {
+    if (!canvasRef.current) return;
 
-      const newCanvas = document.createElement("canvas");
-      newCanvas.width = chartRef.current.width;
-      newCanvas.height = chartRef.current.height;
+    const newCanvas = document.createElement("canvas");
+    newCanvas.width = canvasRef.current.width;
+    newCanvas.height = canvasRef.current.height;
 
-      const ctx = newCanvas.getContext("2d", { willReadFrequently: true });
-      if (!ctx) return;
+    const ctx = newCanvas.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return;
 
-      ctx.fillStyle = WHITE;
-      ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
-      ctx.drawImage(chartRef.current, 0, 0);
+    ctx.fillStyle = WHITE;
+    ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
+    ctx.drawImage(canvasRef.current, 0, 0);
 
-      const blob = await createBlob(newCanvas);
-      if (!blob) return;
+    const blob = await createBlob(newCanvas);
+    if (!blob) return;
 
-      const blobUrl = URL.createObjectURL(blob);
-      createDownload(blobUrl);
-      URL.revokeObjectURL(blobUrl);
-    },
-    []
-  );
+    const blobUrl = URL.createObjectURL(blob);
+    createDownload(blobUrl);
+    URL.revokeObjectURL(blobUrl);
+  }, [canvasRef]);
 
   const handleCanvasChange = React.useCallback(async () => {
     if (!canvasRef.current) return;
@@ -118,9 +114,8 @@ export function Canvas() {
 
   const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) {
-      return;
-    }
+    if (!file) return;
+
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
@@ -186,10 +181,7 @@ export function Canvas() {
             onChange={handleUpload}
             ref={inputRef}
           />
-          <IconButton
-            icon={<ArrowDownTrayIcon />}
-            onClick={() => downloadHandler(canvasRef)}
-          />
+          <IconButton icon={<ArrowDownTrayIcon />} onClick={downloadHandler} />
         </div>
       </div>
     </div>
