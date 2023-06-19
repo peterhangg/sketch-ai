@@ -11,7 +11,6 @@ import { ColorPicker } from "./ColorPicker";
 import { useOnDraw } from "@/hooks/useOnDraw";
 import { useDrawStore } from "@/store/drawStore";
 import { useSaveStore } from "@/store/saveStore";
-import useColorPickerStore from "@/store/colorPickerStore";
 import { createBlob, createDownload } from "@/lib/blob";
 import { WHITE } from "@/lib/constants";
 

@@ -174,27 +174,25 @@ export default function GalleryPage({
         setShowAiModel={() => setShowAiModel((prev) => !prev)}
       />
       <div className="container my-2 grid flex-1 grid-cols-1 gap-3 p-2 md:grid-cols-2 lg:grid-cols-3">
-        <AnimatePresence>
-          {showAiModel
-            ? aiImageList.map((aiImage) => (
-                <GalleryCard
-                  key={aiImage.id}
-                  image={aiImage}
-                  imageModel={AI_IMAGE}
-                  setImageHandler={setSketchHandler}
-                  deleteHandler={deleteHandler}
-                />
-              ))
-            : sketchList.map((sketch) => (
-                <GalleryCard
-                  key={sketch.id}
-                  image={sketch}
-                  imageModel={SKETCH}
-                  setImageHandler={setSketchHandler}
-                  deleteHandler={deleteHandler}
-                />
-              ))}
-        </AnimatePresence>
+        {showAiModel
+          ? aiImageList.map((aiImage) => (
+              <GalleryCard
+                key={aiImage.id}
+                image={aiImage}
+                imageModel={AI_IMAGE}
+                setImageHandler={setSketchHandler}
+                deleteHandler={deleteHandler}
+              />
+            ))
+          : sketchList.map((sketch) => (
+              <GalleryCard
+                key={sketch.id}
+                image={sketch}
+                imageModel={SKETCH}
+                setImageHandler={setSketchHandler}
+                deleteHandler={deleteHandler}
+              />
+            ))}
         <div ref={intersectionRef}></div>
       </div>
     </div>

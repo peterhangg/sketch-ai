@@ -8,6 +8,7 @@ import { Button } from "./ui/Button";
 import { displayToast, ToastVariant } from "./ui/Toast";
 import { ErrorMessage } from "./ui/ErrorMessage";
 import { useDrawStore } from "@/store/drawStore";
+import { useGenerateStore } from "@/store/generateStore";
 import { promptSchema } from "@/lib/validations";
 import { blobUrlToDataURL } from "@/lib/blob";
 import { sleep } from "@/lib/utils";
@@ -17,14 +18,14 @@ type FormData = z.infer<typeof promptSchema>;
 
 export function PromptForm() {
   const {
-    sketch,
     setGeneratedImage,
     loading,
     setLoading,
-    setGenerateError,
+    setError,
     setSubmitted,
     setPrompt,
-  } = useDrawStore((state) => state);
+  } = useGenerateStore((state) => state);
+  const { sketch } = useDrawStore((state) => state);
 
   const {
     handleSubmit,
@@ -44,7 +45,7 @@ export function PromptForm() {
     prompt: string
   ): Promise<void> => {
     try {
-      setGenerateError("");
+      setError("");
 
       const sketchDataUrl = await blobUrlToDataURL(imageUrl);
       const response = await fetch("/api/prediction", {
@@ -57,7 +58,7 @@ export function PromptForm() {
       const responseData = await response.json();
 
       if (!response.ok) {
-        setGenerateError(responseData?.message || SOMETHING_WENT_WRONG);
+        setError(responseData?.message || SOMETHING_WENT_WRONG);
         displayToast(
           responseData?.message || SOMETHING_WENT_WRONG,
           ToastVariant.ERROR
@@ -78,7 +79,7 @@ export function PromptForm() {
           predictionImage = data.output;
         }
         if (data.status === FAILED || timeoutDelta >= timeout) {
-          setGenerateError(SOMETHING_WENT_WRONG);
+          setError(SOMETHING_WENT_WRONG);
           displayToast(SOMETHING_WENT_WRONG, ToastVariant.ERROR);
           return;
         }

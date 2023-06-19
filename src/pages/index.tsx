@@ -7,8 +7,6 @@ import {
   ChevronLeftIcon,
   StarIcon,
 } from "@heroicons/react/24/solid";
-import { useDrawStore } from "@/store/drawStore";
-import { useSaveStore } from "@/store/saveStore";
 import { Canvas } from "@/components/Canvas";
 import { PromptForm } from "@/components/PromptForm";
 import { Spinner } from "@/components/ui/Spinner";
@@ -16,6 +14,9 @@ import { Button, buttonStyles } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
 import { displayToast, ToastVariant } from "@/components/ui/Toast";
 import { LoaderOverlay } from "@/components/ui/LoaderOverlay";
+import { useDrawStore } from "@/store/drawStore";
+import { useSaveStore } from "@/store/saveStore";
+import { useGenerateStore } from "@/store/generateStore";
 import { blobToBase64, createBlob, downloadImage } from "@/lib/blob";
 import { getServerAuthSession } from "@/lib/auth";
 import { ImageModel, User } from "@/lib/types";
@@ -28,15 +29,15 @@ interface HomeProps {
 }
 
 export default function Home({ user }: HomeProps) {
+  const { sketch, reset: resetSketch } = useDrawStore((state) => state);
   const {
-    sketch,
-    generatedImage,
     submitted,
     loading,
     prompt,
-    reset,
-    generateError,
-  } = useDrawStore((state) => state);
+    generatedImage,
+    reset: resetGenerate,
+    error,
+  } = useGenerateStore((state) => state);
   const {
     saveSketch,
     setSaveSketch,
@@ -50,9 +51,10 @@ export default function Home({ user }: HomeProps) {
   );
 
   const resetHandler = React.useCallback((): void => {
-    reset();
+    resetSketch();
+    resetGenerate();
     resetSave();
-  }, [reset, resetSave]);
+  }, [resetSketch, resetGenerate, resetSave]);
 
   const saveHandler = React.useCallback(
     async (imageSrc: string, imageModel: ImageModel) => {
@@ -211,7 +213,7 @@ export default function Home({ user }: HomeProps) {
                 </motion.div>
               )}
 
-              {!loading && generatedImage && !generateError && (
+              {!loading && generatedImage && !error && (
                 <motion.div
                   key="33"
                   className="mt-4 flex h-full flex-col md:mt-0"
@@ -255,7 +257,7 @@ export default function Home({ user }: HomeProps) {
                 </motion.div>
               )}
 
-              {!loading && generateError && (
+              {!loading && error && (
                 <motion.div
                   key="44"
                   className="mt-5 flex h-full flex-col md:mt-0"
