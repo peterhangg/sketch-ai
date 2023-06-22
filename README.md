@@ -1,11 +1,17 @@
-<h3 align="center">Sketch AI<h3>
+<p align="center">
+  <a href="https://sketch-ai-gpt.vercel.app/">
+    <picture>
+      <img src="public/app-icon.png" width="125" height="158">
+    </picture>
+    <h1 align="center">Sketch AI</h1>
+  </a>
+</p>
 
 <!-- BUILT WITH -->
 
 ### Built With
 
 - [Next.js](https://nextjs.org/)
-- [React.js](https://react.dev/)
 - [Tailwind CSS](https://tailwindcss.com/)
 - [Prisma](https://prisma.io/)
 - [Replicate](https://replicate.com/)
@@ -69,7 +75,7 @@ To get a local copy up and running, please follow these simple steps.
 7. Set up rate-limiting
 
 - Create Redis client on [Upstash](https://docs.upstash.com/redis) and add keys to `.env` file.
-- Currently set to **15 request per hour**. This can be updated in `lib/rate-limit.ts`.
+- Currently set to **10 request per hour**. This can be updated in `lib/rate-limit.ts`.
 
 8. Set up AWS for storage
 
@@ -95,7 +101,7 @@ To get a local copy up and running, please follow these simple steps.
       ```
       npx prisma migrate dev
       ```
-    - Interactive visual editor [(Prisma Studio)](https://www.prisma.io/docs/concepts/components/prisma-studio) for data in the database on a new terminal.
+    - Interactive visual editor [(Prisma Studio)](https://www.prisma.io/docs/concepts/components/prisma-studio) for data in the database. Run command in new terminal.
       ```
       npx prisma studio
       ```
@@ -125,10 +131,6 @@ To get a local copy up and running, please follow these simple steps.
     ```
 
 - Open http://localhost:3000 with your browser to see the result.
-
-## Limitation
-
-- Vercel serverless function execution timeout is capped at 10 seconds currently (upgrade required for production)
 
 ## Deploy on Vercel
 
