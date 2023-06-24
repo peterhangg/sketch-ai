@@ -21,8 +21,14 @@ export function Canvas() {
     setSketchBlob,
     srcFromGallery,
     setSrcFromGallery,
-  } = useDrawStore((state) => state);
-  const { setSaveSketch, setSaveAiImage } = useSaveStore((state) => state);
+  } = useDrawStore([
+    "sketch",
+    "setSketch",
+    "setSketchBlob",
+    "srcFromGallery",
+    "setSrcFromGallery",
+  ]);
+  const { setSaveSketch } = useSaveStore(["setSaveSketch"]);
 
   const {
     canvasRef,
@@ -62,7 +68,6 @@ export function Canvas() {
       };
       setSrcFromGallery(false);
       setSaveSketch(true);
-      setSaveAiImage(false);
     }
   }, [
     canvasRef,
@@ -71,7 +76,6 @@ export function Canvas() {
     setSrcFromGallery,
     setSketchBlob,
     setSaveSketch,
-    setSaveAiImage,
   ]);
 
   const handleMouseDown = React.useCallback(() => {

@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { createStoreWithSelectors } from "./util";
 
 interface IColorPickerStore {
   isOpen: boolean;
@@ -7,11 +8,11 @@ interface IColorPickerStore {
   toggleOpen: () => void;
 }
 
-const useColorPickerStore = create<IColorPickerStore>((set) => ({
+const colorPickerStore = create<IColorPickerStore>((set) => ({
   isOpen: false,
   onOpen: () => set({ isOpen: true }),
   onClose: () => set({ isOpen: false }),
   toggleOpen: () => set((state) => ({ isOpen: !state.isOpen })),
 }));
 
-export default useColorPickerStore;
+export const useColorPickerStore = createStoreWithSelectors(colorPickerStore);
