@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { createStoreWithSelectors } from "./utils";
 
 interface IGenerateStore {
   prompt: string;
@@ -22,7 +23,7 @@ const initialState = {
   generatedImage: "",
 };
 
-export const useGenerateStore = create<IGenerateStore>(
+const generateStore = create<IGenerateStore>(
   (set, _get): IGenerateStore => ({
     ...initialState,
     setPrompt: (promptMsg: string) => {
@@ -62,3 +63,5 @@ export const useGenerateStore = create<IGenerateStore>(
     },
   })
 );
+
+export const useGenerateStore = createStoreWithSelectors(generateStore);

@@ -1,7 +1,7 @@
 import { BLACK, WHITE } from "@/lib/constants";
 import React from "react";
 import { IconButton } from "./ui/IconButton";
-import useColorPickerStore from "@/store/colorPickerStore";
+import { useColorPickerStore } from "@/store/colorPickerStore";
 import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 
 interface ColorPickerProps {
@@ -25,7 +25,11 @@ const colorPalette = [
 ];
 
 export const ColorPicker = ({ setColor, color }: ColorPickerProps) => {
-  const { isOpen, toggleOpen, onClose } = useColorPickerStore((state) => state);
+  const { isOpen, toggleOpen, onClose } = useColorPickerStore([
+    "isOpen",
+    "toggleOpen",
+    "onClose",
+  ]);
   const colorRef = React.useRef<HTMLDivElement | null>(null);
 
   const handleColorSelected = (newColor: string) => {

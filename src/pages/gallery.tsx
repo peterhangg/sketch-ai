@@ -1,7 +1,6 @@
 import React from "react";
 import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
-import { AnimatePresence } from "framer-motion";
 import { getServerAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isValidUrl } from "@/lib/utils";
@@ -11,6 +10,7 @@ import { displayToast, ToastVariant } from "@/components/ui/Toast";
 import { Toggle } from "@/components/ui/Toggle";
 import { useIntersection } from "@/hooks/useIntersection";
 import { useDrawStore } from "@/store/drawStore";
+import { useGenerateStore } from "@/store/generateStore";
 import { AI_IMAGE, SKETCH, SOMETHING_WENT_WRONG } from "@/lib/constants";
 
 interface GalleryPageProps {
@@ -48,9 +48,12 @@ export default function GalleryPage({
     string | null
   >(cursorForAiImages);
   const [showAiModel, setShowAiModel] = React.useState<boolean>(false);
-  const { setSketch, setSrcFromGallery, reset } = useDrawStore(
-    (state) => state
-  );
+  const { setSketch, setSrcFromGallery, reset } = useDrawStore([
+    "setSketch",
+    "setSrcFromGallery",
+    "reset",
+  ]);
+  const { reset: resetGenerate } = useGenerateStore(["reset"]);
   const intersectionRef = React.useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -157,11 +160,12 @@ export default function GalleryPage({
       if (!user || !sketchUrl) return;
 
       reset();
+      resetGenerate();
       setSketch(sketchUrl);
       setSrcFromGallery(true);
       router.push("/");
     },
-    [user, router, setSketch, reset, setSrcFromGallery]
+    [user, router, setSketch, reset, setSrcFromGallery, resetGenerate]
   );
 
   useIntersection({ targetRef: intersectionRef, callback: getImagesHandler });

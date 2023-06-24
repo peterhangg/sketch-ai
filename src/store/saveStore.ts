@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { createStoreWithSelectors } from "./utils";
 
 interface ISaveStore {
   saveSketch: boolean;
@@ -13,7 +14,7 @@ const initialState = {
   saveAiImage: false,
 };
 
-export const useSaveStore = create<ISaveStore>(
+const saveStore = create<ISaveStore>(
   (set, _get): ISaveStore => ({
     ...initialState,
     setSaveSketch: (saveState: boolean) => {
@@ -35,3 +36,5 @@ export const useSaveStore = create<ISaveStore>(
     },
   })
 );
+
+export const useSaveStore = createStoreWithSelectors(saveStore);

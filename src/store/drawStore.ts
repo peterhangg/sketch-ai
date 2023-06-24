@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { createStoreWithSelectors } from "./utils";
 
 interface IDrawStore {
   sketch: string;
@@ -16,7 +17,7 @@ const initialState = {
   srcFromGallery: false,
 };
 
-export const useDrawStore = create<IDrawStore>(
+const drawStore = create<IDrawStore>(
   (set, _get): IDrawStore => ({
     ...initialState,
     setSketch: (imageUrl: string) => {
@@ -44,3 +45,5 @@ export const useDrawStore = create<IDrawStore>(
     },
   })
 );
+
+export const useDrawStore = createStoreWithSelectors(drawStore);

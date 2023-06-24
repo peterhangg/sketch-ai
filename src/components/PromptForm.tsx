@@ -13,6 +13,7 @@ import { promptSchema } from "@/lib/validations";
 import { blobUrlToDataURL } from "@/lib/blob";
 import { sleep } from "@/lib/utils";
 import { FAILED, SOMETHING_WENT_WRONG, SUCCEEDED } from "@/lib/constants";
+import { useSaveStore } from "@/store/saveStore";
 
 type FormData = z.infer<typeof promptSchema>;
 
@@ -24,8 +25,16 @@ export function PromptForm() {
     setError,
     setSubmitted,
     setPrompt,
-  } = useGenerateStore((state) => state);
-  const { sketch } = useDrawStore((state) => state);
+  } = useGenerateStore([
+    "setGeneratedImage",
+    "loading",
+    "setLoading",
+    "setError",
+    "setSubmitted",
+    "setPrompt",
+  ]);
+  const { sketch } = useDrawStore(["sketch"]);
+  const { setSaveAiImage } = useSaveStore(["setSaveAiImage"]);
 
   const {
     handleSubmit,
@@ -46,6 +55,7 @@ export function PromptForm() {
   ): Promise<void> => {
     try {
       setError("");
+      setSaveAiImage(false);
 
       const sketchDataUrl = await blobUrlToDataURL(imageUrl);
       const response = await fetch("/api/prediction", {

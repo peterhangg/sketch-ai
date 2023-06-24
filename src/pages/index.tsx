@@ -29,7 +29,7 @@ interface HomeProps {
 }
 
 export default function Home({ user }: HomeProps) {
-  const { sketch, reset: resetSketch } = useDrawStore((state) => state);
+  const { sketch, reset: resetSketch } = useDrawStore(["sketch", "reset"]);
   const {
     submitted,
     loading,
@@ -37,14 +37,27 @@ export default function Home({ user }: HomeProps) {
     generatedImage,
     reset: resetGenerate,
     error,
-  } = useGenerateStore((state) => state);
+  } = useGenerateStore([
+    "submitted",
+    "loading",
+    "prompt",
+    "generatedImage",
+    "reset",
+    "error",
+  ]);
   const {
     saveSketch,
     setSaveSketch,
     saveAiImage,
     setSaveAiImage,
     reset: resetSave,
-  } = useSaveStore((state) => state);
+  } = useSaveStore([
+    "saveSketch",
+    "setSaveSketch",
+    "saveAiImage",
+    "setSaveAiImage",
+    "reset",
+  ]);
   const [saveLoading, setSaveLoading] = React.useState<boolean>(false);
   const [imageModelType, setImageModelType] = React.useState<ImageModel | null>(
     null
