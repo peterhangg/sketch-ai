@@ -14,7 +14,7 @@ const initialState = {
   saveAiImage: false,
 };
 
-const saveStore = create<ISaveStore>(
+export const saveStore = create<ISaveStore>(
   (set, _get): ISaveStore => ({
     ...initialState,
     setSaveSketch: (saveState: boolean) => {

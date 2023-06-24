@@ -17,7 +17,7 @@ const initialState = {
   srcFromGallery: false,
 };
 
-const drawStore = create<IDrawStore>(
+export const drawStore = create<IDrawStore>(
   (set, _get): IDrawStore => ({
     ...initialState,
     setSketch: (imageUrl: string) => {

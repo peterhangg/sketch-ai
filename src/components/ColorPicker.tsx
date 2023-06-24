@@ -1,3 +1,5 @@
+"use client";
+
 import { BLACK, WHITE } from "@/lib/constants";
 import React from "react";
 import { IconButton } from "./ui/IconButton";

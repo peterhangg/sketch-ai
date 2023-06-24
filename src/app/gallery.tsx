@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";

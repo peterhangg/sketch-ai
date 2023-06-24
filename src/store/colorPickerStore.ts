@@ -8,7 +8,7 @@ interface IColorPickerStore {
   toggleOpen: () => void;
 }
 
-const colorPickerStore = create<IColorPickerStore>((set) => ({
+export const colorPickerStore = create<IColorPickerStore>((set) => ({
   isOpen: false,
   onOpen: () => set({ isOpen: true }),
   onClose: () => set({ isOpen: false }),

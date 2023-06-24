@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
   ArrowUturnLeftIcon,
@@ -28,7 +30,10 @@ export function Canvas() {
     "srcFromGallery",
     "setSrcFromGallery",
   ]);
-  const { setSaveSketch } = useSaveStore(["setSaveSketch"]);
+  const { setSaveSketch, setSaveAiImage } = useSaveStore([
+    "setSaveSketch",
+    "setSaveAiImage",
+  ]);
 
   const {
     canvasRef,

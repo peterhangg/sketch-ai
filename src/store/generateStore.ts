@@ -23,7 +23,7 @@ const initialState = {
   generatedImage: "",
 };
 
-const generateStore = create<IGenerateStore>(
+export const generateStore = create<IGenerateStore>(
   (set, _get): IGenerateStore => ({
     ...initialState,
     setPrompt: (promptMsg: string) => {
