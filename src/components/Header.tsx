@@ -9,6 +9,7 @@ import AppIcon from "../../public/app-icon.png";
 
 export function Header() {
   const { data: session } = useSession();
+
   return (
     <motion.header
       className="container sticky top-0 z-50 mx-auto bg-white px-4"

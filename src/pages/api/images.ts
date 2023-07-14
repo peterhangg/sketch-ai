@@ -36,9 +36,13 @@ async function handler(
 
   if (req.method === "GET") {
     const { cursor, imageModel } = getImagesSchema.parse(req.query);
-    let currentCursor;
+    let currentCursor: string | Date = "";
 
-    if (cursor) {
+    if (
+      cursor !== "null" &&
+      isValidDate(cursor) &&
+      typeof cursor === "string"
+    ) {
       let dateValue = cursor;
       if (Array.isArray(dateValue)) {
         dateValue = dateValue[0];
