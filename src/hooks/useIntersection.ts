@@ -22,8 +22,8 @@ export const useIntersection = ({
   const observer = React.useRef<IntersectionObserver | null>(null);
   const intersected = React.useRef<boolean>(false);
 
-  const intersectionHandler = React.useCallback(
-    ([entry]: IntersectionObserverEntry[]) => {
+  React.useEffect(() => {
+    const intersectionHandler = ([entry]: IntersectionObserverEntry[]) => {
       if (entry.isIntersecting) {
         callback();
 
@@ -33,11 +33,8 @@ export const useIntersection = ({
           intersected.current = true;
         }
       }
-    },
-    [callback, observer, intersected, executeOnce]
-  );
+    };
 
-  React.useEffect(() => {
     if (!intersected.current && targetRef.current) {
       observer.current = new IntersectionObserver(intersectionHandler, options);
       observer.current.observe(targetRef.current);
@@ -49,5 +46,5 @@ export const useIntersection = ({
         observer.current = null;
       }
     };
-  }, [intersectionHandler, targetRef, options]);
+  }, [targetRef, options, callback, executeOnce]);
 };

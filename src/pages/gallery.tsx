@@ -1,61 +1,74 @@
 import React from "react";
-import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
-import { getServerAuthSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { useSession } from "next-auth/react";
 import { isValidUrl } from "@/lib/utils";
-import { AiImage, Sketch, User } from "@prisma/client";
+import { AiImage, Sketch } from "@prisma/client";
 import { GalleryCard } from "@/components/GalleryCard";
 import { displayToast, ToastVariant } from "@/components/ui/Toast";
 import { Toggle } from "@/components/ui/Toggle";
+import { GalleryLoader } from "@/components/GalleryLoader";
 import { useIntersection } from "@/hooks/useIntersection";
 import { useDrawStore } from "@/store/drawStore";
 import { useGenerateStore } from "@/store/generateStore";
 import { AI_IMAGE, SKETCH, SOMETHING_WENT_WRONG } from "@/lib/constants";
 
-interface GalleryPageProps {
-  user: User;
-  initialSketches: Sketch[];
-  initialAiImages: AiImage[];
-  hasMoreSketches: boolean;
-  hasMoreAiImages: boolean;
-  cursorForSketches: string | null;
-  cursorForAiImages: string | null;
-}
-
-export default function GalleryPage({
-  user,
-  initialSketches,
-  initialAiImages,
-  hasMoreSketches,
-  hasMoreAiImages,
-  cursorForSketches,
-  cursorForAiImages,
-}: GalleryPageProps) {
-  const [sketchList, setSketchList] = React.useState<Sketch[]>(initialSketches);
-  const [aiImageList, setAiImageList] =
-    React.useState<Sketch[]>(initialAiImages);
-  const [loading, setLoading] = React.useState<boolean>(false);
+export default function GalleryPage() {
+  const [sketchList, setSketchList] = React.useState<Sketch[]>([]);
+  const [aiImageList, setAiImageList] = React.useState<AiImage[]>([]);
+  const [loading, setLoading] = React.useState<boolean>(true);
   const [_error, setError] = React.useState<string | null>(null);
   const [hasMoreDataForSketches, setHasMoreDataForSketches] =
-    React.useState<boolean>(hasMoreSketches);
+    React.useState<boolean>(false);
   const [hasMoreDataForAiImages, setHasMoreDataForAiImages] =
-    React.useState<boolean>(hasMoreAiImages);
+    React.useState<boolean>(false);
   const [nextCursorForSketches, setNextCursorForSketches] = React.useState<
     string | null
-  >(cursorForSketches);
+  >(null);
   const [nextCursorForAiImages, setNextCursorForAiImages] = React.useState<
     string | null
-  >(cursorForAiImages);
+  >(null);
   const [showAiModel, setShowAiModel] = React.useState<boolean>(false);
+  const intersectionRef = React.useRef<HTMLDivElement>(null);
+
   const { setSketch, setSrcFromGallery, reset } = useDrawStore([
     "setSketch",
     "setSrcFromGallery",
     "reset",
   ]);
   const { reset: resetGenerate } = useGenerateStore(["reset"]);
-  const intersectionRef = React.useRef<HTMLDivElement>(null);
+
   const router = useRouter();
+  const { data: session } = useSession();
+  const user = React.useMemo(() => {
+    return session?.user;
+  }, [session]);
+
+  React.useEffect(() => {
+    (async () => {
+      try {
+        setLoading(true);
+        const [sketchesRes, aiImagesRes] = await Promise.all([
+          fetch(`/api/images?cursor=${""}&imageModel=${SKETCH}`),
+          fetch(`/api/images?cursor=${""}&imageModel=${AI_IMAGE}`),
+        ]);
+        const sketchesData = await sketchesRes.json();
+        const aiImagesData = await aiImagesRes.json();
+
+        setSketchList(sketchesData.images);
+        setNextCursorForSketches(sketchesData.cursor);
+        setHasMoreDataForSketches(sketchesData.hasMore);
+
+        setAiImageList(aiImagesData.images);
+        setNextCursorForAiImages(aiImagesData.cursor);
+        setHasMoreDataForAiImages(aiImagesData.hasMore);
+      } catch (error) {
+        console.error(error);
+        displayToast(SOMETHING_WENT_WRONG, ToastVariant.ERROR);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   const getImagesHandler = React.useCallback(async () => {
     let imageModel = SKETCH;
@@ -70,9 +83,8 @@ export default function GalleryPage({
 
     if (!cursor || loading || !hasMoreData) return;
 
-    setLoading(true);
-
     try {
+      setLoading(true);
       const response = await fetch(
         `/api/images?cursor=${cursor}&imageModel=${imageModel}`
       );
@@ -197,53 +209,9 @@ export default function GalleryPage({
                 deleteHandler={deleteHandler}
               />
             ))}
-        <div ref={intersectionRef}></div>
       </div>
+      {loading && <GalleryLoader />}
+      <div ref={intersectionRef}></div>
     </div>
   );
-}
-
-export async function getServerSideProps(ctx: GetServerSidePropsContext) {
-  const session = await getServerAuthSession(ctx);
-  const userId = session?.user.id;
-
-  const sketches = await prisma.sketch.findMany({
-    where: { userId },
-    orderBy: { createdAt: "desc" },
-    take: 6,
-  });
-  const hasMoreSketches = sketches.length === 6;
-  const cursorForSketches = hasMoreSketches
-    ? sketches[sketches.length - 1].createdAt.toISOString()
-    : null;
-  const formattedSketches = sketches.map((sketch) => ({
-    ...sketch,
-    createdAt: sketch.createdAt.toISOString(),
-  }));
-
-  const aiImages = await prisma.aiImage.findMany({
-    where: { userId },
-    orderBy: { createdAt: "desc" },
-    take: 6,
-  });
-  const hasMoreAiImages = aiImages.length === 6;
-  const cursorForAiImages = hasMoreAiImages
-    ? aiImages[aiImages.length - 1].createdAt.toISOString()
-    : null;
-  const formattedAiImages = aiImages.map((aiImage) => ({
-    ...aiImage,
-    createdAt: aiImage.createdAt.toISOString(),
-  }));
-
-  return {
-    props: {
-      user: session?.user || null,
-      initialSketches: formattedSketches,
-      initialAiImages: formattedAiImages,
-      hasMoreSketches,
-      cursorForSketches,
-      hasMoreAiImages,
-      cursorForAiImages,
-    },
-  };
 }
