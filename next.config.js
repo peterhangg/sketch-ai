@@ -5,6 +5,7 @@ const nextConfig = {
     domains: [
       "replicate.com",
       "replicate.delivery",
+      "pbxt.replicate.delivery",
       "sketch-ai.s3.us-east-1.amazonaws.com",
     ],
   },

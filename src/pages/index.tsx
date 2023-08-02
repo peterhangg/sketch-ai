@@ -109,12 +109,12 @@ export default function Home({ user }: HomeProps) {
         }
         if (imageModel === SKETCH) {
           setSaveSketch(true);
-          displayToast("Sketch was saved.", ToastVariant.SUCCESS);
+          displayToast("Sketch saved.", ToastVariant.SUCCESS);
         }
 
         if (imageModel === AI_IMAGE) {
           setSaveAiImage(true);
-          displayToast("AI Image was saved.", ToastVariant.SUCCESS);
+          displayToast("AI Image saved.", ToastVariant.SUCCESS);
         }
       } catch (error) {
         console.error(error);

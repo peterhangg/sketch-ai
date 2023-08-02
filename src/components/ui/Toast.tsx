@@ -43,7 +43,7 @@ const toastStyles = cva(
   }
 );
 
-const TOAST_DURATION = 2000;
+const TOAST_DURATION = 5000;
 
 const getToastIcon = (
   variant: ToastVariant,
