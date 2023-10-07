@@ -144,8 +144,8 @@ export function Canvas() {
     <div>
       <canvas
         className="h-full w-full rounded-md border border-black"
-        width={625}
-        height={725}
+        width={600}
+        height={675}
         ref={canvasRef}
         onMouseDown={handleMouseDown}
         onMouseUp={handleCanvasChange}

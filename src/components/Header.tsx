@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -9,6 +10,8 @@ import AppIcon from "../../public/app-icon.png";
 
 export function Header() {
   const { data: session } = useSession();
+  const pathname = usePathname();
+  const isPathGallery = pathname === "/gallery";
 
   return (
     <motion.header
@@ -33,7 +36,12 @@ export function Header() {
           <div>
             <Link
               href="/gallery"
-              className={cn(buttonStyles({ variant: "light" }), "mr-2")}
+              className={cn(
+                buttonStyles({
+                  variant: isPathGallery ? "default" : "light",
+                }),
+                `mr-2 ${isPathGallery && "pointer-events-none"}`
+              )}
             >
               Gallery
             </Link>
